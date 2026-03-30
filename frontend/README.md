@@ -1,70 +1,216 @@
-# Getting Started with Create React App
+# 🗳️ Smart Contract-Based Voting System
+### A Case Study of Multimedia University of Kenya
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+**Author:** Bichage Nigel Ombaba (CIT-222-033/2021)  
+**Supervisor:** Dr. Nick Ishmael  
+**Department:** Computer Technology, Faculty of Computing and Information Technology  
+**Institution:** Multimedia University of Kenya  
 
-## Available Scripts
+---
 
-In the project directory, you can run:
+## Overview
 
-### `npm start`
+A blockchain-enabled, smart contract-based voting system designed for institutional elections at Multimedia University of Kenya. The system addresses transparency, security, and trust challenges in traditional voting by recording votes on an Ethereum blockchain through Solidity smart contracts.
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+### Key Features
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+- **Blockchain-Backed Votes** — Immutable vote recording via Ethereum smart contracts
+- **Voter Anonymity** — Database stores only transaction hashes, never candidate choices
+- **Individual Verification** — Voters receive a cryptographic receipt to verify their vote
+- **Real-Time Results** — Automated tallying via smart contract upon poll closure
+- **Role-Based Access** — Voter, Electoral Admin, and System Admin roles
+- **Complete Audit Trail** — Every admin action logged with timestamps and IP addresses
+- **34 Automated Tests** — 100% pass rate across all backend functionality
 
-### `npm test`
+---
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+## Technology Stack
 
-### `npm run build`
+| Layer | Technology | Purpose |
+|-------|-----------|---------|
+| Frontend | React.js 18 | Single-page application with role-based views |
+| Backend | Django 5.2 + DRF | REST API with JWT authentication |
+| Database | PostgreSQL 17 | User data, election metadata, audit logs |
+| Blockchain | Ethereum (Solidity 0.8.19) | Immutable vote ledger and election logic |
+| Blockchain Tools | Hardhat + Ganache | Development, testing, deployment |
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+---
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+## Project Structure
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+```
+mmu-voting/
+├── backend/                     # Django REST API
+│   ├── accounts/                # User management, JWT auth, audit logs
+│   ├── voting/                  # Elections, candidates, voting, blockchain service
+│   ├── voting_project/          # Django settings and URL configuration
+│   ├── tests.py                 # 34 automated tests
+│   └── requirements.txt         # Python dependencies
+├── contracts/
+│   └── VotingSystem.sol         # Solidity smart contract (239 lines)
+├── scripts/
+│   └── deploy.js                # Hardhat deployment script
+├── test/
+│   └── VotingSystem.test.js     # Smart contract tests
+├── hardhat.config.js
+└── package.json
+```
 
-### `npm run eject`
+---
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+## Setup & Installation
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+### Prerequisites
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+- Python 3.10+
+- Node.js 18+
+- PostgreSQL 17
+- Git
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+### 1. Clone the Repository
 
-## Learn More
+```bash
+git clone https://github.com/YOUR_USERNAME/mmu-voting-system.git
+cd mmu-voting-system
+```
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+### 2. Backend Setup
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+```bash
+cd backend
+pip install -r requirements.txt
+```
 
-### Code Splitting
+### 3. Configure Database
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+Create a PostgreSQL database called `mmu_voting`, then edit `backend/voting_project/settings.py`:
 
-### Analyzing the Bundle Size
+```python
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'mmu_voting',
+        'USER': 'postgres',
+        'PASSWORD': 'your_password',
+        'HOST': 'localhost',
+        'PORT': '5432',
+    }
+}
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+### 4. Initialize Database
 
-### Making a Progressive Web App
+```bash
+pip install psycopg2-binary
+python manage.py migrate
+python manage.py seed_data
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+This creates test users and a sample election with 3 candidates.
 
-### Advanced Configuration
+### 5. Install Smart Contract Dependencies
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+```bash
+cd ..
+npm install
+```
 
-### Deployment
+### 6. Frontend Setup
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+```bash
+npx create-react-app frontend
+```
 
-### `npm run build` fails to minify
+Copy the contents of `mmu-voting-frontend.jsx` into `frontend/src/App.js`, then:
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+```bash
+cd frontend
+npm start
+```
+
+---
+
+## Running the Application
+
+You need **two terminals** running simultaneously:
+
+**Terminal 1 — Backend:**
+```bash
+cd backend
+python manage.py runserver 8000
+```
+
+**Terminal 2 — Frontend:**
+```bash
+cd frontend
+npm start
+```
+
+Then open **http://localhost:3000** in your browser.
+
+**Optional — Terminal 3 — Local Blockchain:**
+```bash
+npx ganache --port 8545
+npx hardhat run scripts/deploy.js --network ganache
+```
+
+---
+
+## Test Credentials
+
+| Role | Student ID | Password |
+|------|-----------|----------|
+| Electoral Admin | `ADMIN001` | `admin123` |
+| System Admin | `SYSADMIN001` | `sysadmin123` |
+| Voter 1 | `CIT-222-001/2021` | `voter123` |
+| Voter 2-10 | `CIT-222-002/2021` to `CIT-222-010/2021` | `voter123` |
+
+---
+
+## API Endpoints
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/accounts/login/` | Authenticate user |
+| POST | `/api/accounts/register/` | Register new user |
+| GET | `/api/voting/elections/` | List all elections |
+| POST | `/api/voting/elections/{id}/vote/` | Cast a vote |
+| POST | `/api/voting/verify/` | Verify vote by transaction hash |
+| GET | `/api/voting/elections/{id}/results/` | Get election results |
+
+Full API documentation with 20 endpoints available in the project documentation.
+
+---
+
+## Testing
+
+**Backend Tests (34 tests, 100% pass rate):**
+```bash
+cd backend
+python manage.py test tests --verbosity=2
+```
+
+**Smart Contract Tests:**
+```bash
+npx hardhat test
+```
+
+---
+
+## Security Features
+
+- JWT authentication with role-based token expiry
+- PBKDF2-SHA256 password hashing (870,000 iterations)
+- CSRF protection on all state-modifying endpoints
+- SQL injection prevention via Django ORM
+- Double-vote prevention at both smart contract and database levels
+- Voter anonymity by design (vote_records stores only tx hash, not candidate choice)
+- Circuit breaker for emergency election pause
+
+---
+
+## License
+
+This project was developed as a BSc Computer Technology capstone project at Multimedia University of Kenya.
+
+© 2026 Bichage Nigel Ombaba. All rights reserved.

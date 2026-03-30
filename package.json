@@ -1,0 +1,19 @@
+{
+  "name": "mmu-voting-contracts",
+  "version": "1.0.0",
+  "description": "Smart Contract-Based Voting System for Multimedia University of Kenya",
+  "author": "Bichage Nigel Ombaba (CIT-222-033/2021)",
+  "license": "MIT",
+  "scripts": {
+    "compile": "npx hardhat compile",
+    "test": "npx hardhat test",
+    "test:coverage": "npx hardhat coverage",
+    "deploy:local": "npx hardhat run scripts/deploy.js --network ganache",
+    "deploy:sepolia": "npx hardhat run scripts/deploy.js --network sepolia",
+    "node": "npx hardhat node"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^4.0.0",
+    "hardhat": "^2.19.0"
+  }
+}

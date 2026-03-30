@@ -1,0 +1,24 @@
+databases:
+  - name: mmu-voting-db
+    plan: free
+    databaseName: mmu_voting
+    user: mmu_admin
+
+services:
+  - type: web
+    name: mmu-voting-backend
+    runtime: python
+    plan: free
+    buildCommand: cd backend && chmod +x build.sh && ./build.sh
+    startCommand: cd backend && gunicorn voting_project.wsgi:application --bind 0.0.0.0:$PORT
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: mmu-voting-db
+          property: connectionString
+      - key: DJANGO_SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: "False"
+      - key: PYTHON_VERSION
+        value: "3.12.0"

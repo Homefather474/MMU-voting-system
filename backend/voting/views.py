@@ -139,7 +139,7 @@ class ElectionPhaseView(APIView):
                 election.save()
 
             elif action == 'open_polls':
-                if election.status != 'registration':
+                if election.status not in ['registration', 'voting']:
                     return Response({'error': 'Must be in registration phase'}, status=status.HTTP_400_BAD_REQUEST)
                 if election.candidates.count() < 2:
                     return Response({'error': 'Need at least 2 candidates'}, status=status.HTTP_400_BAD_REQUEST)
@@ -191,7 +191,7 @@ class VoterRegisterView(APIView):
     """Register a voter for an election"""
     def post(self, request, election_id):
         election = get_object_or_404(Election, pk=election_id)
-        if election.status != 'registration':
+        if election.status not in ['registration', 'voting']:
             return Response({'error': 'Registration is not open'}, status=status.HTTP_400_BAD_REQUEST)
         if not request.user.is_eligible:
             return Response({'error': 'You are not eligible to vote'}, status=status.HTTP_403_FORBIDDEN)

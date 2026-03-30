@@ -81,23 +81,24 @@ function AuthProvider({ children }) {
 const useAuth = () => useContext(AuthContext);
 
 // ═══════════════════════════════════════════════════════════════
-// STYLES
+// STYLES — MMU Brand Colors (Maroon dominant, Gold accent, minimal Blue)
 // ═══════════════════════════════════════════════════════════════
 const colors = {
-  bg: "#0a0e17",
-  card: "#111827",
-  cardAlt: "#1a2236",
-  border: "#1e293b",
-  accent: "#10b981",
-  accentDim: "#065f46",
-  accentBright: "#34d399",
+  bg: "#0c0a14",
+  card: "#15121f",
+  cardAlt: "#1e1a2e",
+  border: "#2a2540",
+  accent: "#b91c3c",        // MMU Maroon (brighter red)
+  accentDim: "#7f1d2f",
+  accentBright: "#e11d48",
   danger: "#ef4444",
-  warning: "#f59e0b",
-  blue: "#3b82f6",
-  purple: "#8b5cf6",
-  text: "#e2e8f0",
-  textDim: "#94a3b8",
-  textMuted: "#64748b",
+  warning: "#d4a017",       // MMU Gold
+  blue: "#1a3a6b",          // MMU Navy Blue (used sparingly)
+  purple: "#9f1239",        // Shifted to rose/red family
+  gold: "#d4a017",          // MMU Gold accent
+  text: "#e8e4f0",
+  textDim: "#a8a0b8",
+  textMuted: "#6e6580",
   white: "#ffffff",
 };
 
@@ -109,16 +110,16 @@ const baseStyles = {
   card: { background: colors.card, borderRadius: 16, border: `1px solid ${colors.border}`, padding: 28, marginBottom: 20, backdropFilter: "blur(10px)" },
   cardHeader: { fontSize: 18, fontWeight: 700, color: colors.white, marginBottom: 16, display: "flex", alignItems: "center", gap: 10 },
   btn: { padding: "12px 24px", borderRadius: 10, border: "none", fontWeight: 600, fontSize: 14, cursor: "pointer", transition: "all 0.2s", fontFamily: font, display: "inline-flex", alignItems: "center", gap: 8 },
-  btnPrimary: { background: `linear-gradient(135deg, ${colors.accent}, #059669)`, color: colors.white },
+  btnPrimary: { background: `linear-gradient(135deg, ${colors.accent}, #6b1525)`, color: colors.white },
   btnDanger: { background: `linear-gradient(135deg, ${colors.danger}, #dc2626)`, color: colors.white },
   btnOutline: { background: "transparent", border: `1px solid ${colors.border}`, color: colors.textDim },
-  btnBlue: { background: `linear-gradient(135deg, ${colors.blue}, #2563eb)`, color: colors.white },
+  btnBlue: { background: `linear-gradient(135deg, ${colors.blue}, #0f2a52)`, color: colors.white },
   input: { width: "100%", padding: "12px 16px", borderRadius: 10, border: `1px solid ${colors.border}`, background: colors.cardAlt, color: colors.text, fontSize: 14, fontFamily: font, outline: "none", boxSizing: "border-box" },
   label: { display: "block", fontSize: 13, fontWeight: 600, color: colors.textDim, marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.5px" },
   badge: (color) => ({ display: "inline-block", padding: "4px 12px", borderRadius: 20, fontSize: 12, fontWeight: 600, background: `${color}22`, color: color, border: `1px solid ${color}44` }),
   grid: (cols) => ({ display: "grid", gridTemplateColumns: `repeat(${cols}, 1fr)`, gap: 16 }),
   stat: { textAlign: "center", padding: 20 },
-  statNum: { fontSize: 32, fontWeight: 800, background: `linear-gradient(135deg, ${colors.accent}, ${colors.blue})`, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" },
+  statNum: { fontSize: 32, fontWeight: 800, background: `linear-gradient(135deg, ${colors.accent}, ${colors.warning})`, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" },
   statLabel: { fontSize: 12, color: colors.textMuted, textTransform: "uppercase", letterSpacing: 1, marginTop: 4 },
 };
 
@@ -128,7 +129,7 @@ const baseStyles = {
 const StatusBadge = ({ status }) => {
   const map = {
     not_started: { color: colors.textMuted, label: "Not Started" },
-    registration: { color: colors.blue, label: "Registration Open" },
+    registration: { color: colors.accent, label: "Registration Open" },
     voting: { color: colors.accent, label: "Voting Open" },
     ended: { color: colors.warning, label: "Ended" },
     results_published: { color: colors.purple, label: "Results Published" },
@@ -145,7 +146,7 @@ const LoadingSpinner = () => (
 );
 
 const Alert = ({ type = "info", children }) => {
-  const c = { success: colors.accent, error: colors.danger, warning: colors.warning, info: colors.blue }[type];
+  const c = { success: colors.accent, error: colors.danger, warning: colors.warning, info: colors.accent }[type];
   return (
     <div style={{ padding: "14px 18px", borderRadius: 10, background: `${c}15`, border: `1px solid ${c}33`, color: c, fontSize: 14, marginBottom: 16 }}>
       {children}
@@ -184,10 +185,10 @@ const Navbar = ({ currentView, setView }) => {
     <nav style={{ background: `${colors.card}ee`, borderBottom: `1px solid ${colors.border}`, backdropFilter: "blur(20px)", position: "sticky", top: 0, zIndex: 100 }}>
       <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 24px", display: "flex", alignItems: "center", justifyContent: "space-between", height: 64 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          <div style={{ width: 36, height: 36, borderRadius: 10, background: `linear-gradient(135deg, ${colors.accent}, ${colors.blue})`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18 }}>🗳️</div>
+          <div style={{ width: 36, height: 36, borderRadius: 10, overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center" }}><img src="/mmu-logo.png" alt="MMU" style={{ width: 36, height: 36, objectFit: "contain" }} /></div>
           <div>
             <div style={{ fontSize: 15, fontWeight: 700, color: colors.white, lineHeight: 1 }}>MMU E-Vote</div>
-            <div style={{ fontSize: 10, color: colors.textMuted, letterSpacing: 1 }}>BLOCKCHAIN SECURED</div>
+            <div style={{ fontSize: 10, color: colors.warning, letterSpacing: 1 }}>BLOCKCHAIN SECURED</div>
           </div>
         </div>
         <div style={{ display: "flex", gap: 4 }}>
@@ -239,12 +240,12 @@ const LoginPage = () => {
     <div style={{ ...baseStyles.page, display: "flex", alignItems: "center", justifyContent: "center" }}>
       <div style={{ position: "absolute", inset: 0, overflow: "hidden", pointerEvents: "none" }}>
         <div style={{ position: "absolute", top: "10%", left: "15%", width: 400, height: 400, borderRadius: "50%", background: `radial-gradient(circle, ${colors.accent}08, transparent)` }} />
-        <div style={{ position: "absolute", bottom: "10%", right: "15%", width: 500, height: 500, borderRadius: "50%", background: `radial-gradient(circle, ${colors.blue}06, transparent)` }} />
+        <div style={{ position: "absolute", bottom: "10%", right: "15%", width: 500, height: 500, borderRadius: "50%", background: `radial-gradient(circle, ${colors.accent}06, transparent)` }} />
       </div>
 
       <div style={{ width: 440, position: "relative", zIndex: 1 }}>
         <div style={{ textAlign: "center", marginBottom: 32 }}>
-          <div style={{ width: 72, height: 72, borderRadius: 18, background: `linear-gradient(135deg, ${colors.accent}, ${colors.blue})`, display: "inline-flex", alignItems: "center", justifyContent: "center", fontSize: 36, marginBottom: 16, boxShadow: `0 8px 32px ${colors.accent}33` }}>🗳️</div>
+          <div style={{ width: 72, height: 72, borderRadius: 18, overflow: "hidden", display: "inline-flex", alignItems: "center", justifyContent: "center", marginBottom: 16, boxShadow: `0 8px 32px ${colors.accent}33` }}><img src="/mmu-logo.png" alt="MMU" style={{ width: 72, height: 72, objectFit: "contain" }} /></div>
           <h1 style={{ fontSize: 28, fontWeight: 800, color: colors.white, margin: 0 }}>MMU E-Vote</h1>
           <p style={{ color: colors.textMuted, fontSize: 14, margin: "8px 0 0" }}>Smart Contract-Based Voting System</p>
           <p style={{ color: colors.textMuted, fontSize: 12 }}>Multimedia University of Kenya</p>
@@ -485,7 +486,7 @@ const ElectionDetail = ({ election: initialElection, setView }) => {
             <div style={baseStyles.statLabel}>Candidates</div>
           </div>
           <div style={baseStyles.stat}>
-            <div style={{ fontSize: 24, fontWeight: 800, color: colors.blue }}>{election.total_voters}</div>
+            <div style={{ fontSize: 24, fontWeight: 800, color: colors.gold }}>{election.total_voters}</div>
             <div style={baseStyles.statLabel}>Registered</div>
           </div>
           <div style={baseStyles.stat}>
@@ -503,7 +504,7 @@ const ElectionDetail = ({ election: initialElection, setView }) => {
 
       {error && <Alert type="error">{error}</Alert>}
 
-      {/* Voter Status & Actions */}
+      {/* Voter Status & Registration */}
       {user?.role === "voter" && (
         <div style={baseStyles.card}>
           <div style={baseStyles.cardHeader}><span>📋</span> Your Voting Status</div>
@@ -516,11 +517,20 @@ const ElectionDetail = ({ election: initialElection, setView }) => {
             </span>
           </div>
 
-          {election.status === "registration" && !myStatus?.is_registered && (
-            <button onClick={handleRegister} disabled={loading}
-              style={{ ...baseStyles.btn, ...baseStyles.btnPrimary, opacity: loading ? 0.7 : 1 }}>
-              {loading ? "Registering..." : "Register to Vote"}
-            </button>
+          {/* Register button — shown in registration OR voting phase if not registered */}
+          {(election.status === "registration" || election.status === "voting") && !myStatus?.is_registered && (
+            <div>
+              <p style={{ color: colors.textDim, fontSize: 13, marginBottom: 12 }}>You must register before you can vote in this election.</p>
+              <button onClick={handleRegister} disabled={loading}
+                style={{ ...baseStyles.btn, ...baseStyles.btnPrimary, opacity: loading ? 0.7 : 1, padding: "14px 32px", fontSize: 15 }}>
+                {loading ? "Registering..." : "📝 Register to Vote"}
+              </button>
+            </div>
+          )}
+
+          {/* Registration success message */}
+          {myStatus?.is_registered && !myStatus?.has_voted && election.status === "voting" && (
+            <Alert type="info">You are registered! Select a candidate below to cast your vote.</Alert>
           )}
 
           {myStatus?.has_voted && myStatus?.transaction_hash && (
@@ -547,12 +557,12 @@ const ElectionDetail = ({ election: initialElection, setView }) => {
         </div>
       )}
 
-      {/* Candidates & Voting */}
+      {/* Candidates — clickable after registration during voting phase */}
       {election.status === "voting" && myStatus?.is_registered && !myStatus?.has_voted && !voteResult && (
         <div style={baseStyles.card}>
           <div style={baseStyles.cardHeader}><span>🗳️</span> Cast Your Vote</div>
-          <p style={{ color: colors.textDim, fontSize: 13, marginBottom: 20 }}>Select your preferred candidate and confirm your vote. This action is irreversible.</p>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300, 1fr))", gap: 16 }}>
+          <p style={{ color: colors.textDim, fontSize: 13, marginBottom: 20 }}>Click on a candidate to select them, then confirm your vote. This action is irreversible.</p>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: 16 }}>
             {election.candidates?.map(c => (
               <div key={c.id} onClick={() => { setSelectedCandidate(c); setConfirmVote(false); }}
                 style={{
@@ -561,7 +571,7 @@ const ElectionDetail = ({ election: initialElection, setView }) => {
                   borderRadius: 14, padding: 20, cursor: "pointer", transition: "all 0.2s",
                 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 12 }}>
-                  <div style={{ width: 48, height: 48, borderRadius: 12, background: `linear-gradient(135deg, ${[colors.accent, colors.blue, colors.purple, colors.warning][c.ballot_number % 4]}, ${colors.cardAlt})`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, fontWeight: 800, color: colors.white }}>{c.ballot_number}</div>
+                  <div style={{ width: 48, height: 48, borderRadius: 12, background: `linear-gradient(135deg, ${[colors.accent, colors.accent, colors.accentBright, colors.warning][c.ballot_number % 4]}, ${colors.cardAlt})`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, fontWeight: 800, color: colors.white }}>{c.ballot_number}</div>
                   <div>
                     <div style={{ fontSize: 16, fontWeight: 700, color: colors.white }}>{c.full_name}</div>
                     <div style={{ fontSize: 12, color: colors.textMuted }}>{c.position}</div>
@@ -598,15 +608,18 @@ const ElectionDetail = ({ election: initialElection, setView }) => {
         </div>
       )}
 
-      {/* Candidates List (non-voting view) */}
-      {(election.status !== "voting" || myStatus?.has_voted || !myStatus?.is_registered) && !voteResult && (
+      {/* Candidates List — view only (not registered, already voted, or not voting phase) */}
+      {(!voteResult && (election.status !== "voting" || myStatus?.has_voted || !myStatus?.is_registered)) && (
         <div style={baseStyles.card}>
           <div style={baseStyles.cardHeader}><span>👤</span> Candidates</div>
+          {election.status === "voting" && !myStatus?.is_registered && (
+            <Alert type="warning">Register above to unlock voting. You can view the candidates below.</Alert>
+          )}
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 16 }}>
             {election.candidates?.map(c => (
               <div key={c.id} style={{ background: colors.cardAlt, borderRadius: 12, padding: 18, border: `1px solid ${colors.border}` }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 10 }}>
-                  <div style={{ width: 40, height: 40, borderRadius: 10, background: `linear-gradient(135deg, ${[colors.accent, colors.blue, colors.purple][c.ballot_number % 3]}, ${colors.cardAlt})`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16, fontWeight: 800, color: colors.white }}>{c.ballot_number}</div>
+                  <div style={{ width: 40, height: 40, borderRadius: 10, background: `linear-gradient(135deg, ${[colors.accent, colors.accent, colors.accentBright][c.ballot_number % 3]}, ${colors.cardAlt})`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16, fontWeight: 800, color: colors.white }}>{c.ballot_number}</div>
                   <div>
                     <div style={{ fontWeight: 700, color: colors.white }}>{c.full_name}</div>
                     <div style={{ fontSize: 12, color: colors.textMuted }}>{c.position}</div>
@@ -633,7 +646,7 @@ const ElectionDetail = ({ election: initialElection, setView }) => {
                 <span style={{ fontWeight: 700, color: colors.white }}>{r.vote_count} votes ({totalVotesResult > 0 ? Math.round(r.vote_count / totalVotesResult * 100) : 0}%)</span>
               </div>
               <div style={{ height: 10, background: colors.cardAlt, borderRadius: 5, overflow: "hidden" }}>
-                <div style={{ height: "100%", borderRadius: 5, background: i === 0 ? `linear-gradient(90deg, ${colors.accent}, ${colors.accentBright})` : `linear-gradient(90deg, ${colors.blue}, ${colors.purple})`, width: `${totalVotesResult > 0 ? (r.vote_count / totalVotesResult * 100) : 0}%`, transition: "width 1s ease" }} />
+                <div style={{ height: "100%", borderRadius: 5, background: i === 0 ? `linear-gradient(90deg, ${colors.warning}, #e8b82a)` : `linear-gradient(90deg, ${colors.accentDim}, ${colors.accent})`, width: `${totalVotesResult > 0 ? (r.vote_count / totalVotesResult * 100) : 0}%`, transition: "width 1s ease" }} />
               </div>
             </div>
           ))}
@@ -905,7 +918,7 @@ const AdminPanel = ({ setView, setSelectedElection }) => {
                   <div style={{ fontSize: 12, color: colors.textMuted, marginBottom: 8 }}>Candidates:</div>
                   <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
                     {e.candidates.map(c => (
-                      <span key={c.id} style={{ ...baseStyles.badge(colors.blue), fontSize: 12 }}>#{c.ballot_number} {c.full_name}</span>
+                      <span key={c.id} style={{ ...baseStyles.badge(colors.accent), fontSize: 12 }}>#{c.ballot_number} {c.full_name}</span>
                     ))}
                   </div>
                 </div>
@@ -932,7 +945,7 @@ const AdminPanel = ({ setView, setSelectedElection }) => {
                   <td style={{ padding: "10px 12px", fontFamily: "monospace", fontSize: 13, color: colors.text }}>{u.student_id}</td>
                   <td style={{ padding: "10px 12px", color: colors.white, fontWeight: 500 }}>{u.full_name}</td>
                   <td style={{ padding: "10px 12px", color: colors.textDim, fontSize: 13 }}>{u.email}</td>
-                  <td style={{ padding: "10px 12px" }}><span style={baseStyles.badge(u.role === "admin" ? colors.purple : u.role === "sysadmin" ? colors.danger : colors.blue)}>{u.role}</span></td>
+                  <td style={{ padding: "10px 12px" }}><span style={baseStyles.badge(u.role === "admin" ? colors.purple : u.role === "sysadmin" ? colors.danger : colors.accent)}>{u.role}</span></td>
                   <td style={{ padding: "10px 12px", color: colors.textDim, fontSize: 13 }}>{u.faculty}</td>
                   <td style={{ padding: "10px 12px" }}><span style={{ color: u.is_eligible ? colors.accent : colors.textMuted }}>{u.is_eligible ? "✅" : "—"}</span></td>
                 </tr>
@@ -953,7 +966,7 @@ const AdminPanel = ({ setView, setSelectedElection }) => {
                   <div style={{ fontSize: 11, color: colors.textMuted }}>{log.ip_address}</div>
                 </div>
                 <div>
-                  <span style={baseStyles.badge(colors.blue)}>{log.action}</span>
+                  <span style={baseStyles.badge(colors.accent)}>{log.action}</span>
                   <div style={{ fontSize: 13, color: colors.textDim, marginTop: 4 }}>{log.details}</div>
                   <div style={{ fontSize: 11, color: colors.textMuted }}>{log.actor_name}</div>
                 </div>

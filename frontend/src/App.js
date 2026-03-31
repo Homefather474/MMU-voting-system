@@ -3,7 +3,7 @@ import { useState, useEffect, useCallback, createContext, useContext } from "rea
 // ═══════════════════════════════════════════════════════════════
 // API SERVICE LAYER
 // ═══════════════════════════════════════════════════════════════
-const API_BASE = "http://localhost:8000/api";
+const API_BASE = "https://mmu-voting-backend.onrender.com/api";
 
 const api = {
   token: null,

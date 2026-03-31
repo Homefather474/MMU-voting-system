@@ -16,8 +16,8 @@ class Command(BaseCommand):
         admin, created = User.objects.get_or_create(
             student_id='ADMIN001',
             defaults={
-                'full_name': 'Dr. Nick Ishmael',
-                'email': 'admin@mmu.ac.ke',
+                'full_name': 'Nigel Ombaba',
+                'email': 'admin@gmail.com',
                 'role': 'admin',
                 'faculty': 'Computing and IT',
                 'department': 'Computer Technology',

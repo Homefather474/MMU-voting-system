@@ -7,7 +7,7 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields = ['id', 'student_id', 'full_name', 'email', 'role', 'faculty',
                   'department', 'is_eligible', 'wallet_address', 'created_at']
-        read_only_fields = ['id', 'created_at']
+        read_only_fields = ['id', 'role', 'is_eligible', 'wallet_address', 'created_at']
 
 
 class UserRegistrationSerializer(serializers.ModelSerializer):

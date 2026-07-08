@@ -517,8 +517,14 @@ const ElectionDetail = ({ election: initialElection, setView }) => {
             </span>
           </div>
 
-          {/* Register button — shown in registration OR voting phase if not registered */}
-          {(election.status === "registration" || election.status === "voting") && !myStatus?.is_registered && (
+          {!user?.is_eligible && (
+            <Alert type="warning">
+              Your account is not marked as eligible to vote. Contact an electoral administrator to approve your eligibility before registering for elections.
+            </Alert>
+          )}
+
+          {/* Register button — shown in registration OR voting phase if eligible and not registered */}
+          {user?.is_eligible && (election.status === "registration" || election.status === "voting") && !myStatus?.is_registered && (
             <div>
               <p style={{ color: colors.textDim, fontSize: 13, marginBottom: 12 }}>You must register before you can vote in this election.</p>
               <button onClick={handleRegister} disabled={loading}
@@ -817,6 +823,14 @@ const AdminPanel = ({ setView, setSelectedElection }) => {
     } catch (err) { setMsg("Error: " + err.message); }
   };
 
+  const markEligible = async (studentId) => {
+    try {
+      const result = await api.post("/accounts/bulk-eligibility/", { student_ids: [studentId] });
+      setMsg(`Marked ${result.updated} user(s) as eligible`);
+      await loadData();
+    } catch (err) { setMsg("Error: " + err.message); }
+  };
+
   const addCandidate = async (electionId) => {
     const name = prompt("Candidate full name:");
     if (!name) return;
@@ -934,7 +948,7 @@ const AdminPanel = ({ setView, setSelectedElection }) => {
           <table style={{ width: "100%", borderCollapse: "collapse" }}>
             <thead>
               <tr style={{ borderBottom: `1px solid ${colors.border}` }}>
-                {["Student ID", "Name", "Email", "Role", "Faculty", "Eligible"].map(h => (
+                {["Student ID", "Name", "Email", "Role", "Faculty", "Eligible", ""].map(h => (
                   <th key={h} style={{ padding: "10px 12px", textAlign: "left", fontSize: 11, color: colors.textMuted, textTransform: "uppercase" }}>{h}</th>
                 ))}
               </tr>
@@ -948,6 +962,13 @@ const AdminPanel = ({ setView, setSelectedElection }) => {
                   <td style={{ padding: "10px 12px" }}><span style={baseStyles.badge(u.role === "admin" ? colors.purple : u.role === "sysadmin" ? colors.danger : colors.accent)}>{u.role}</span></td>
                   <td style={{ padding: "10px 12px", color: colors.textDim, fontSize: 13 }}>{u.faculty}</td>
                   <td style={{ padding: "10px 12px" }}><span style={{ color: u.is_eligible ? colors.accent : colors.textMuted }}>{u.is_eligible ? "✅" : "—"}</span></td>
+                  <td style={{ padding: "10px 12px" }}>
+                    {u.role === "voter" && !u.is_eligible && (
+                      <button onClick={() => markEligible(u.student_id)} style={{ ...baseStyles.btn, ...baseStyles.btnPrimary, fontSize: 11, padding: "6px 10px" }}>
+                        Mark Eligible
+                      </button>
+                    )}
+                  </td>
                 </tr>
               ))}
             </tbody>

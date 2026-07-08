@@ -155,9 +155,9 @@ const Alert = ({ type = "info", children }) => {
 };
 
 const StatCard = ({ icon, value, label }) => (
-  <div style={{ ...baseStyles.card, ...baseStyles.stat }}>
+  <div className="mmu-card mmu-stat-card" style={{ ...baseStyles.card, ...baseStyles.stat }}>
     <div style={{ fontSize: 28, marginBottom: 8 }}>{icon}</div>
-    <div style={baseStyles.statNum}>{value}</div>
+    <div className="stat-num" style={baseStyles.statNum}>{value}</div>
     <div style={baseStyles.statLabel}>{label}</div>
   </div>
 );
@@ -167,6 +167,7 @@ const StatCard = ({ icon, value, label }) => (
 // ═══════════════════════════════════════════════════════════════
 const Navbar = ({ currentView, setView }) => {
   const { user, logout } = useAuth();
+  const [menuOpen, setMenuOpen] = useState(false);
   const isAdmin = user?.role === "admin" || user?.role === "sysadmin";
 
   const navItems = [
@@ -181,30 +182,78 @@ const Navbar = ({ currentView, setView }) => {
     navItems.push({ key: "system", label: "System", icon: "🖥️" });
   }
 
+  const navigate = (key) => {
+    setView(key);
+    setMenuOpen(false);
+  };
+
+  const navButtonStyle = (key) => ({
+    ...baseStyles.btn,
+    padding: "8px 16px",
+    fontSize: 13,
+    background: currentView === key ? `${colors.accent}22` : "transparent",
+    color: currentView === key ? colors.accent : colors.textDim,
+    border: currentView === key ? `1px solid ${colors.accent}44` : "1px solid transparent",
+    borderRadius: 8,
+  });
+
   return (
-    <nav style={{ background: `${colors.card}ee`, borderBottom: `1px solid ${colors.border}`, backdropFilter: "blur(20px)", position: "sticky", top: 0, zIndex: 100 }}>
-      <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 24px", display: "flex", alignItems: "center", justifyContent: "space-between", height: 64 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          <div style={{ width: 36, height: 36, borderRadius: 10, overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center" }}><img src="/mmu-logo.png" alt="MMU" style={{ width: 36, height: 36, objectFit: "contain" }} /></div>
-          <div>
-            <div style={{ fontSize: 15, fontWeight: 700, color: colors.white, lineHeight: 1 }}>MMU E-Vote</div>
-            <div style={{ fontSize: 10, color: colors.warning, letterSpacing: 1 }}>BLOCKCHAIN SECURED</div>
+    <nav className="mmu-nav" style={{ background: `${colors.card}ee`, borderBottom: `1px solid ${colors.border}` }}>
+      <div className="mmu-nav-inner">
+        <div className="mmu-nav-brand">
+          <div style={{ width: 36, height: 36, borderRadius: 10, overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+            <img src="/mmu-logo.png" alt="MMU" style={{ width: 36, height: 36, objectFit: "contain" }} />
+          </div>
+          <div style={{ minWidth: 0 }}>
+            <div className="mmu-nav-brand-title" style={{ fontSize: 15, fontWeight: 700, color: colors.white, lineHeight: 1 }}>MMU E-Vote</div>
+            <div className="mmu-nav-brand-sub" style={{ fontSize: 10, color: colors.warning, letterSpacing: 1 }}>BLOCKCHAIN SECURED</div>
           </div>
         </div>
-        <div style={{ display: "flex", gap: 4 }}>
+
+        <div className="mmu-nav-desktop">
+          <div className="mmu-nav-links">
+            {navItems.map(item => (
+              <button key={item.key} onClick={() => navigate(item.key)} style={navButtonStyle(item.key)}>
+                <span>{item.icon}</span> {item.label}
+              </button>
+            ))}
+          </div>
+          <div className="mmu-nav-user">
+            <div className="mmu-nav-user-text">
+              <div style={{ fontSize: 13, fontWeight: 600, color: colors.text }}>{user?.full_name}</div>
+              <div style={{ fontSize: 11, color: colors.textMuted }}>{user?.student_id} · {user?.role}</div>
+            </div>
+            <button onClick={logout} style={{ ...baseStyles.btn, ...baseStyles.btnOutline, padding: "8px 14px", fontSize: 12 }}>Logout</button>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          className="mmu-nav-menu-btn"
+          onClick={() => setMenuOpen(o => !o)}
+          aria-label={menuOpen ? "Close menu" : "Open menu"}
+          aria-expanded={menuOpen}
+        >
+          {menuOpen ? "✕" : "☰"}
+        </button>
+      </div>
+
+      <div className={`mmu-nav-mobile-panel${menuOpen ? " open" : ""}`}>
+        <div className="mmu-nav-mobile-links">
           {navItems.map(item => (
-            <button key={item.key} onClick={() => setView(item.key)}
-              style={{ ...baseStyles.btn, padding: "8px 16px", fontSize: 13, background: currentView === item.key ? `${colors.accent}22` : "transparent", color: currentView === item.key ? colors.accent : colors.textDim, border: currentView === item.key ? `1px solid ${colors.accent}44` : "1px solid transparent", borderRadius: 8 }}>
+            <button key={item.key} onClick={() => navigate(item.key)} style={navButtonStyle(item.key)}>
               <span>{item.icon}</span> {item.label}
             </button>
           ))}
         </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          <div style={{ textAlign: "right" }}>
-            <div style={{ fontSize: 13, fontWeight: 600, color: colors.text }}>{user?.full_name}</div>
-            <div style={{ fontSize: 11, color: colors.textMuted }}>{user?.student_id} · {user?.role}</div>
+        <div className="mmu-nav-mobile-user">
+          <div>
+            <div style={{ fontSize: 14, fontWeight: 600, color: colors.text }}>{user?.full_name}</div>
+            <div style={{ fontSize: 12, color: colors.textMuted, marginTop: 2 }}>{user?.student_id} · {user?.role}</div>
           </div>
-          <button onClick={logout} style={{ ...baseStyles.btn, ...baseStyles.btnOutline, padding: "8px 14px", fontSize: 12 }}>Logout</button>
+          <button onClick={() => { logout(); setMenuOpen(false); }} style={{ ...baseStyles.btn, ...baseStyles.btnOutline, padding: "10px 14px", fontSize: 13 }}>
+            Logout
+          </button>
         </div>
       </div>
     </nav>
@@ -237,13 +286,13 @@ const LoginPage = () => {
   const set = (k) => (e) => setForm(f => ({ ...f, [k]: e.target.value }));
 
   return (
-    <div style={{ ...baseStyles.page, display: "flex", alignItems: "center", justifyContent: "center" }}>
+    <div className="mmu-login-page" style={{ ...baseStyles.page }}>
       <div style={{ position: "absolute", inset: 0, overflow: "hidden", pointerEvents: "none" }}>
         <div style={{ position: "absolute", top: "10%", left: "15%", width: 400, height: 400, borderRadius: "50%", background: `radial-gradient(circle, ${colors.accent}08, transparent)` }} />
         <div style={{ position: "absolute", bottom: "10%", right: "15%", width: 500, height: 500, borderRadius: "50%", background: `radial-gradient(circle, ${colors.accent}06, transparent)` }} />
       </div>
 
-      <div style={{ width: 440, position: "relative", zIndex: 1 }}>
+      <div className="mmu-login-wrap" style={{ position: "relative", zIndex: 1 }}>
         <div style={{ textAlign: "center", marginBottom: 32 }}>
           <div style={{ width: 72, height: 72, borderRadius: 18, overflow: "hidden", display: "inline-flex", alignItems: "center", justifyContent: "center", marginBottom: 16, boxShadow: `0 8px 32px ${colors.accent}33` }}><img src="/mmu-logo.png" alt="MMU" style={{ width: 72, height: 72, objectFit: "contain" }} /></div>
           <h1 style={{ fontSize: 28, fontWeight: 800, color: colors.white, margin: 0 }}>MMU E-Vote</h1>
@@ -275,7 +324,7 @@ const LoginPage = () => {
                   <label style={baseStyles.label}>Email</label>
                   <input style={baseStyles.input} type="email" placeholder="your.email@students.mmu.ac.ke" value={form.email} onChange={set("email")} required />
                 </div>
-                <div style={{ ...baseStyles.grid(2), marginBottom: 16 }}>
+                <div className="mmu-grid-2" style={{ marginBottom: 16 }}>
                   <div>
                     <label style={baseStyles.label}>Faculty</label>
                     <input style={baseStyles.input} placeholder="e.g. Computing & IT" value={form.faculty} onChange={set("faculty")} />
@@ -341,13 +390,13 @@ const Dashboard = ({ setView, setSelectedElection }) => {
   const activeElections = elections.filter(e => e.status === "voting" || e.status === "registration");
 
   return (
-    <div style={baseStyles.container}>
+    <div className="mmu-container" style={baseStyles.container}>
       <div style={{ marginBottom: 28 }}>
-        <h1 style={{ fontSize: 26, fontWeight: 800, color: colors.white, margin: 0 }}>Welcome back, {user?.full_name?.split(" ")[0]}</h1>
+        <h1 className="mmu-page-title" style={{ fontSize: 26, fontWeight: 800, color: colors.white, margin: 0 }}>Welcome back, {user?.full_name?.split(" ")[0]}</h1>
         <p style={{ color: colors.textMuted, margin: "4px 0 0", fontSize: 14 }}>Here's your voting overview</p>
       </div>
 
-      <div style={baseStyles.grid(4)}>
+      <div className="mmu-grid-4">
         <StatCard icon="🗳️" value={stats?.total_elections || 0} label="Total Elections" />
         <StatCard icon="🟢" value={stats?.active_elections || 0} label="Active Now" />
         <StatCard icon="👥" value={stats?.total_voters || 0} label="Registered Voters" />
@@ -355,21 +404,22 @@ const Dashboard = ({ setView, setSelectedElection }) => {
       </div>
 
       {activeElections.length > 0 && (
-        <div style={baseStyles.card}>
+        <div className="mmu-card" style={baseStyles.card}>
           <div style={baseStyles.cardHeader}>
             <span>🔴</span> Active Elections
           </div>
           {activeElections.map(election => (
-            <div key={election.id} style={{ background: colors.cardAlt, borderRadius: 12, padding: 20, marginBottom: 12, border: `1px solid ${colors.border}`, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <div key={election.id} className="mmu-stack-mobile" style={{ background: colors.cardAlt, borderRadius: 12, padding: 20, marginBottom: 12, border: `1px solid ${colors.border}` }}>
               <div>
                 <h3 style={{ fontSize: 16, fontWeight: 700, color: colors.white, margin: 0 }}>{election.title}</h3>
                 <p style={{ fontSize: 13, color: colors.textDim, margin: "6px 0", maxWidth: 500 }}>{election.description?.substring(0, 120)}...</p>
-                <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+                <div className="mmu-meta-row" style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
                   <StatusBadge status={election.status} />
                   <span style={{ fontSize: 12, color: colors.textMuted }}>📊 {election.total_votes} votes · 👥 {election.total_voters} registered · 🏷️ {election.candidates?.length} candidates</span>
                 </div>
               </div>
               <button onClick={() => { setSelectedElection(election); setView("election-detail"); }}
+                className="mmu-full-width-mobile"
                 style={{ ...baseStyles.btn, ...baseStyles.btnPrimary, whiteSpace: "nowrap" }}>
                 {election.status === "voting" ? "Vote Now →" : "View →"}
               </button>
@@ -378,11 +428,12 @@ const Dashboard = ({ setView, setSelectedElection }) => {
         </div>
       )}
 
-      <div style={baseStyles.card}>
+      <div className="mmu-card" style={baseStyles.card}>
         <div style={baseStyles.cardHeader}><span>📜</span> All Elections</div>
         {elections.length === 0 ? (
           <p style={{ color: colors.textMuted, textAlign: "center", padding: 20 }}>No elections found</p>
         ) : (
+          <div className="mmu-table-wrap">
           <table style={{ width: "100%", borderCollapse: "collapse" }}>
             <thead>
               <tr style={{ borderBottom: `1px solid ${colors.border}` }}>
@@ -406,6 +457,7 @@ const Dashboard = ({ setView, setSelectedElection }) => {
               ))}
             </tbody>
           </table>
+          </div>
         )}
       </div>
     </div>
@@ -468,19 +520,19 @@ const ElectionDetail = ({ election: initialElection, setView }) => {
   const totalVotesResult = results?.results?.reduce((s, r) => s + r.vote_count, 0) || results?.total_votes || 0;
 
   return (
-    <div style={baseStyles.container}>
+    <div className="mmu-container" style={baseStyles.container}>
       <button onClick={() => setView("elections")} style={{ ...baseStyles.btn, ...baseStyles.btnOutline, marginBottom: 20, fontSize: 13 }}>← Back to Elections</button>
 
-      <div style={baseStyles.card}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+      <div className="mmu-card" style={baseStyles.card}>
+        <div className="mmu-flex-between-start">
           <div>
-            <h1 style={{ fontSize: 24, fontWeight: 800, color: colors.white, margin: 0 }}>{election.title}</h1>
+            <h1 className="mmu-election-title" style={{ fontSize: 24, fontWeight: 800, color: colors.white, margin: 0 }}>{election.title}</h1>
             <p style={{ color: colors.textDim, margin: "8px 0", fontSize: 14 }}>{election.description}</p>
           </div>
           <StatusBadge status={election.status} />
         </div>
 
-        <div style={{ ...baseStyles.grid(4), marginTop: 20, padding: "16px 0", borderTop: `1px solid ${colors.border}` }}>
+        <div className="mmu-grid-4" style={{ marginTop: 20, padding: "16px 0", borderTop: `1px solid ${colors.border}` }}>
           <div style={baseStyles.stat}>
             <div style={{ fontSize: 24, fontWeight: 800, color: colors.accent }}>{election.candidates?.length || 0}</div>
             <div style={baseStyles.statLabel}>Candidates</div>
@@ -506,9 +558,9 @@ const ElectionDetail = ({ election: initialElection, setView }) => {
 
       {/* Voter Status & Registration */}
       {user?.role === "voter" && (
-        <div style={baseStyles.card}>
+        <div className="mmu-card" style={baseStyles.card}>
           <div style={baseStyles.cardHeader}><span>📋</span> Your Voting Status</div>
-          <div style={{ display: "flex", gap: 16, alignItems: "center", marginBottom: 16 }}>
+          <div style={{ display: "flex", gap: 16, alignItems: "center", marginBottom: 16, flexWrap: "wrap" }}>
             <span style={baseStyles.badge(myStatus?.is_registered ? colors.accent : colors.textMuted)}>
               {myStatus?.is_registered ? "✅ Registered" : "⬜ Not Registered"}
             </span>

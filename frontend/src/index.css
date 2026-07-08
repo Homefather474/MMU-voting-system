@@ -1,13 +1,355 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
+  font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
 }
 
 code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
+}
+
+button {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ── Layout utilities ── */
+.mmu-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px 24px;
+}
+
+.mmu-grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+.mmu-grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.mmu-grid-4 {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+.mmu-grid-auto {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.mmu-grid-auto-vote {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 16px;
+}
+
+.mmu-stack-mobile,
+.mmu-flex-between {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.mmu-flex-between-start {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.mmu-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.mmu-table-wrap table {
+  min-width: 560px;
+}
+
+.mmu-login-wrap {
+  width: 100%;
+  max-width: 440px;
+  padding: 0 16px;
+}
+
+.mmu-login-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 0;
+}
+
+.mmu-card {
+  overflow-wrap: anywhere;
+}
+
+.mmu-full-width-mobile {
+  width: auto;
+}
+
+.mmu-btn-row {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+/* ── Navbar ── */
+.mmu-nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
+}
+
+.mmu-nav-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 64px;
+  gap: 12px;
+}
+
+.mmu-nav-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.mmu-nav-desktop {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.mmu-nav-links {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.mmu-nav-user {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.mmu-nav-user-text {
+  text-align: right;
+}
+
+.mmu-nav-menu-btn {
+  display: none;
+  background: transparent;
+  border: 1px solid #2a2540;
+  color: #e8e4f0;
+  border-radius: 8px;
+  width: 40px;
+  height: 40px;
+  cursor: pointer;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.mmu-nav-mobile-panel {
+  display: none;
+}
+
+.mmu-nav-mobile-panel.open {
+  display: block;
+  padding: 0 16px 16px;
+  border-top: 1px solid #2a2540;
+}
+
+.mmu-nav-mobile-links {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.mmu-nav-mobile-links button {
+  width: 100%;
+  justify-content: flex-start;
+}
+
+.mmu-nav-mobile-user {
+  padding-top: 12px;
+  border-top: 1px solid #2a2540;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.mmu-nav-mobile-user button {
+  width: 100%;
+  justify-content: center;
+}
+
+/* ── Mobile breakpoint ── */
+@media (max-width: 768px) {
+  .mmu-container {
+    padding: 16px;
+  }
+
+  .mmu-grid-2,
+  .mmu-grid-3,
+  .mmu-grid-4 {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  .mmu-grid-auto,
+  .mmu-grid-auto-vote {
+    grid-template-columns: 1fr;
+  }
+
+  .mmu-stack-mobile,
+  .mmu-flex-between,
+  .mmu-flex-between-start {
+    flex-direction: column;
+    align-items: stretch !important;
+    gap: 12px;
+  }
+
+  .mmu-stack-mobile > button,
+  .mmu-flex-between > button,
+  .mmu-flex-between-start > button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .mmu-hide-mobile {
+    display: none !important;
+  }
+
+  .mmu-nav-desktop {
+    display: none !important;
+  }
+
+  .mmu-nav-menu-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .mmu-nav-mobile-panel.open {
+    display: block;
+  }
+
+  .mmu-nav-user-text {
+    text-align: left;
+  }
+
+  .mmu-full-width-mobile {
+    width: 100% !important;
+  }
+
+  .mmu-stat-card {
+    padding: 16px !important;
+  }
+
+  .mmu-stat-card .stat-num {
+    font-size: 24px !important;
+  }
+
+  .mmu-page-title {
+    font-size: 22px !important;
+  }
+
+  .mmu-election-title {
+    font-size: 20px !important;
+  }
+
+  .mmu-card {
+    padding: 20px !important;
+  }
+
+  .mmu-meta-row {
+    flex-direction: column;
+    align-items: flex-start !important;
+    gap: 8px !important;
+  }
+
+  .mmu-verify-row {
+    flex-direction: column;
+    align-items: flex-start !important;
+    gap: 6px;
+  }
+
+  .mmu-audit-row {
+    flex-direction: column !important;
+    gap: 8px !important;
+  }
+
+  .mmu-sysinfo-row {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 4px;
+  }
+
+  .mmu-admin-tabs button {
+    font-size: 12px !important;
+    padding: 10px 8px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .mmu-container {
+    padding: 12px;
+  }
+
+  .mmu-grid-2,
+  .mmu-grid-3,
+  .mmu-grid-4 {
+    grid-template-columns: 1fr;
+  }
+
+  .mmu-nav-inner {
+    padding: 0 12px;
+    min-height: 56px;
+  }
+
+  .mmu-nav-brand-title {
+    font-size: 14px !important;
+  }
+
+  .mmu-nav-brand-sub {
+    font-size: 9px !important;
+  }
+
+  .mmu-card {
+    padding: 16px !important;
+    border-radius: 12px !important;
+  }
+
+  .mmu-login-wrap {
+    padding: 0 12px;
+  }
 }

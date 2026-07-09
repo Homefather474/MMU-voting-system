@@ -81,21 +81,34 @@ function AuthProvider({ children }) {
 const useAuth = () => useContext(AuthContext);
 
 // ═══════════════════════════════════════════════════════════════
-// STYLES — MMU Brand Colors (Maroon dominant, Gold accent, minimal Blue)
+// RESPONSIVE HOOK
+// ═══════════════════════════════════════════════════════════════
+const useIsMobile = () => {
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  useEffect(() => {
+    const handler = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener("resize", handler);
+    return () => window.removeEventListener("resize", handler);
+  }, []);
+  return isMobile;
+};
+
+// ═══════════════════════════════════════════════════════════════
+// STYLES
 // ═══════════════════════════════════════════════════════════════
 const colors = {
   bg: "#0c0a14",
   card: "#15121f",
   cardAlt: "#1e1a2e",
   border: "#2a2540",
-  accent: "#b91c3c",        // MMU Maroon (brighter red)
+  accent: "#b91c3c",
   accentDim: "#7f1d2f",
   accentBright: "#e11d48",
   danger: "#ef4444",
-  warning: "#d4a017",       // MMU Gold
-  blue: "#1a3a6b",          // MMU Navy Blue (used sparingly)
-  purple: "#9f1239",        // Shifted to rose/red family
-  gold: "#d4a017",          // MMU Gold accent
+  warning: "#d4a017",
+  blue: "#1a3a6b",
+  purple: "#9f1239",
+  gold: "#d4a017",
   text: "#e8e4f0",
   textDim: "#a8a0b8",
   textMuted: "#6e6580",
@@ -106,21 +119,19 @@ const font = "'Segoe UI', system-ui, -apple-system, sans-serif";
 
 const baseStyles = {
   page: { minHeight: "100vh", background: `linear-gradient(135deg, ${colors.bg} 0%, #0f172a 50%, #1a1a2e 100%)`, fontFamily: font, color: colors.text, padding: 0, margin: 0 },
-  container: { maxWidth: 1200, margin: "0 auto", padding: "20px 24px" },
-  card: { background: colors.card, borderRadius: 16, border: `1px solid ${colors.border}`, padding: 28, marginBottom: 20, backdropFilter: "blur(10px)" },
-  cardHeader: { fontSize: 18, fontWeight: 700, color: colors.white, marginBottom: 16, display: "flex", alignItems: "center", gap: 10 },
-  btn: { padding: "12px 24px", borderRadius: 10, border: "none", fontWeight: 600, fontSize: 14, cursor: "pointer", transition: "all 0.2s", fontFamily: font, display: "inline-flex", alignItems: "center", gap: 8 },
+  card: { background: colors.card, borderRadius: 16, border: `1px solid ${colors.border}`, padding: 20, marginBottom: 16, backdropFilter: "blur(10px)" },
+  cardHeader: { fontSize: 16, fontWeight: 700, color: colors.white, marginBottom: 14, display: "flex", alignItems: "center", gap: 8 },
+  btn: { padding: "10px 18px", borderRadius: 10, border: "none", fontWeight: 600, fontSize: 14, cursor: "pointer", transition: "all 0.2s", fontFamily: font, display: "inline-flex", alignItems: "center", gap: 6 },
   btnPrimary: { background: `linear-gradient(135deg, ${colors.accent}, #6b1525)`, color: colors.white },
   btnDanger: { background: `linear-gradient(135deg, ${colors.danger}, #dc2626)`, color: colors.white },
   btnOutline: { background: "transparent", border: `1px solid ${colors.border}`, color: colors.textDim },
   btnBlue: { background: `linear-gradient(135deg, ${colors.blue}, #0f2a52)`, color: colors.white },
-  input: { width: "100%", padding: "12px 16px", borderRadius: 10, border: `1px solid ${colors.border}`, background: colors.cardAlt, color: colors.text, fontSize: 14, fontFamily: font, outline: "none", boxSizing: "border-box" },
-  label: { display: "block", fontSize: 13, fontWeight: 600, color: colors.textDim, marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.5px" },
-  badge: (color) => ({ display: "inline-block", padding: "4px 12px", borderRadius: 20, fontSize: 12, fontWeight: 600, background: `${color}22`, color: color, border: `1px solid ${color}44` }),
-  grid: (cols) => ({ display: "grid", gridTemplateColumns: `repeat(${cols}, 1fr)`, gap: 16 }),
-  stat: { textAlign: "center", padding: 20 },
-  statNum: { fontSize: 32, fontWeight: 800, background: `linear-gradient(135deg, ${colors.accent}, ${colors.warning})`, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" },
-  statLabel: { fontSize: 12, color: colors.textMuted, textTransform: "uppercase", letterSpacing: 1, marginTop: 4 },
+  input: { width: "100%", padding: "12px 14px", borderRadius: 10, border: `1px solid ${colors.border}`, background: colors.cardAlt, color: colors.text, fontSize: 14, fontFamily: font, outline: "none", boxSizing: "border-box" },
+  label: { display: "block", fontSize: 12, fontWeight: 600, color: colors.textDim, marginBottom: 5, textTransform: "uppercase", letterSpacing: "0.5px" },
+  badge: (color) => ({ display: "inline-block", padding: "4px 10px", borderRadius: 20, fontSize: 12, fontWeight: 600, background: `${color}22`, color: color, border: `1px solid ${color}44` }),
+  stat: { textAlign: "center", padding: 16 },
+  statNum: { fontSize: 28, fontWeight: 800, background: `linear-gradient(135deg, ${colors.accent}, ${colors.warning})`, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" },
+  statLabel: { fontSize: 11, color: colors.textMuted, textTransform: "uppercase", letterSpacing: 1, marginTop: 4 },
 };
 
 // ═══════════════════════════════════════════════════════════════
@@ -140,7 +151,7 @@ const StatusBadge = ({ status }) => {
 
 const LoadingSpinner = () => (
   <div style={{ display: "flex", justifyContent: "center", padding: 40 }}>
-    <div style={{ width: 40, height: 40, border: `3px solid ${colors.border}`, borderTopColor: colors.accent, borderRadius: "50%", animation: "spin 0.8s linear infinite" }} />
+    <div style={{ width: 36, height: 36, border: `3px solid ${colors.border}`, borderTopColor: colors.accent, borderRadius: "50%", animation: "spin 0.8s linear infinite" }} />
     <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
   </div>
 );
@@ -148,25 +159,26 @@ const LoadingSpinner = () => (
 const Alert = ({ type = "info", children }) => {
   const c = { success: colors.accent, error: colors.danger, warning: colors.warning, info: colors.accent }[type];
   return (
-    <div style={{ padding: "14px 18px", borderRadius: 10, background: `${c}15`, border: `1px solid ${c}33`, color: c, fontSize: 14, marginBottom: 16 }}>
+    <div style={{ padding: "12px 16px", borderRadius: 10, background: `${c}15`, border: `1px solid ${c}33`, color: c, fontSize: 14, marginBottom: 14 }}>
       {children}
     </div>
   );
 };
 
 const StatCard = ({ icon, value, label }) => (
-  <div className="mmu-card mmu-stat-card" style={{ ...baseStyles.card, ...baseStyles.stat }}>
-    <div style={{ fontSize: 28, marginBottom: 8 }}>{icon}</div>
-    <div className="stat-num" style={baseStyles.statNum}>{value}</div>
+  <div style={{ ...baseStyles.card, ...baseStyles.stat, marginBottom: 0 }}>
+    <div style={{ fontSize: 24, marginBottom: 6 }}>{icon}</div>
+    <div style={baseStyles.statNum}>{value}</div>
     <div style={baseStyles.statLabel}>{label}</div>
   </div>
 );
 
 // ═══════════════════════════════════════════════════════════════
-// NAVBAR
+// NAVBAR — Mobile hamburger menu
 // ═══════════════════════════════════════════════════════════════
 const Navbar = ({ currentView, setView }) => {
   const { user, logout } = useAuth();
+  const isMobile = useIsMobile();
   const [menuOpen, setMenuOpen] = useState(false);
   const isAdmin = user?.role === "admin" || user?.role === "sysadmin";
 
@@ -175,87 +187,78 @@ const Navbar = ({ currentView, setView }) => {
     { key: "elections", label: "Elections", icon: "🗳️" },
     { key: "verify", label: "Verify Vote", icon: "🔍" },
   ];
-  if (isAdmin) {
-    navItems.push({ key: "admin", label: "Admin Panel", icon: "⚙️" });
-  }
-  if (user?.role === "sysadmin") {
-    navItems.push({ key: "system", label: "System", icon: "🖥️" });
-  }
+  if (isAdmin) navItems.push({ key: "admin", label: "Admin Panel", icon: "⚙️" });
+  if (user?.role === "sysadmin") navItems.push({ key: "system", label: "System", icon: "🖥️" });
 
-  const navigate = (key) => {
-    setView(key);
-    setMenuOpen(false);
-  };
-
-  const navButtonStyle = (key) => ({
-    ...baseStyles.btn,
-    padding: "8px 16px",
-    fontSize: 13,
-    background: currentView === key ? `${colors.accent}22` : "transparent",
-    color: currentView === key ? colors.accent : colors.textDim,
-    border: currentView === key ? `1px solid ${colors.accent}44` : "1px solid transparent",
-    borderRadius: 8,
-  });
+  const handleNav = (key) => { setView(key); setMenuOpen(false); };
 
   return (
-    <nav className="mmu-nav" style={{ background: `${colors.card}ee`, borderBottom: `1px solid ${colors.border}` }}>
-      <div className="mmu-nav-inner">
-        <div className="mmu-nav-brand">
-          <div style={{ width: 36, height: 36, borderRadius: 10, overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-            <img src="/mmu-logo.png" alt="MMU" style={{ width: 36, height: 36, objectFit: "contain" }} />
+    <nav style={{ background: `${colors.card}ee`, borderBottom: `1px solid ${colors.border}`, backdropFilter: "blur(20px)", position: "sticky", top: 0, zIndex: 100 }}>
+      <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 16px", display: "flex", alignItems: "center", justifyContent: "space-between", height: 58 }}>
+        {/* Logo */}
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <div style={{ width: 32, height: 32, borderRadius: 8, overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <img src="/mmu-logo.png" alt="MMU" style={{ width: 32, height: 32, objectFit: "contain" }} />
           </div>
-          <div style={{ minWidth: 0 }}>
-            <div className="mmu-nav-brand-title" style={{ fontSize: 15, fontWeight: 700, color: colors.white, lineHeight: 1 }}>MMU E-Vote</div>
-            <div className="mmu-nav-brand-sub" style={{ fontSize: 10, color: colors.warning, letterSpacing: 1 }}>BLOCKCHAIN SECURED</div>
+          <div>
+            <div style={{ fontSize: 14, fontWeight: 700, color: colors.white, lineHeight: 1 }}>MMU E-Vote</div>
+            <div style={{ fontSize: 9, color: colors.warning, letterSpacing: 1 }}>BLOCKCHAIN SECURED</div>
           </div>
         </div>
 
-        <div className="mmu-nav-desktop">
-          <div className="mmu-nav-links">
+        {/* Desktop nav */}
+        {!isMobile && (
+          <div style={{ display: "flex", gap: 2 }}>
             {navItems.map(item => (
-              <button key={item.key} onClick={() => navigate(item.key)} style={navButtonStyle(item.key)}>
+              <button key={item.key} onClick={() => handleNav(item.key)}
+                style={{ ...baseStyles.btn, padding: "7px 12px", fontSize: 13, background: currentView === item.key ? `${colors.accent}22` : "transparent", color: currentView === item.key ? colors.accent : colors.textDim, border: currentView === item.key ? `1px solid ${colors.accent}44` : "1px solid transparent", borderRadius: 8 }}>
                 <span>{item.icon}</span> {item.label}
               </button>
             ))}
           </div>
-          <div className="mmu-nav-user">
-            <div className="mmu-nav-user-text">
-              <div style={{ fontSize: 13, fontWeight: 600, color: colors.text }}>{user?.full_name}</div>
-              <div style={{ fontSize: 11, color: colors.textMuted }}>{user?.student_id} · {user?.role}</div>
-            </div>
-            <button onClick={logout} style={{ ...baseStyles.btn, ...baseStyles.btnOutline, padding: "8px 14px", fontSize: 12 }}>Logout</button>
-          </div>
-        </div>
+        )}
 
-        <button
-          type="button"
-          className="mmu-nav-menu-btn"
-          onClick={() => setMenuOpen(o => !o)}
-          aria-label={menuOpen ? "Close menu" : "Open menu"}
-          aria-expanded={menuOpen}
-        >
-          {menuOpen ? "✕" : "☰"}
-        </button>
+        {/* Desktop user info + logout */}
+        {!isMobile && (
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <div style={{ textAlign: "right" }}>
+              <div style={{ fontSize: 12, fontWeight: 600, color: colors.text }}>{user?.full_name}</div>
+              <div style={{ fontSize: 10, color: colors.textMuted }}>{user?.student_id} · {user?.role}</div>
+            </div>
+            <button onClick={logout} style={{ ...baseStyles.btn, ...baseStyles.btnOutline, padding: "7px 12px", fontSize: 12 }}>Logout</button>
+          </div>
+        )}
+
+        {/* Mobile hamburger */}
+        {isMobile && (
+          <button onClick={() => setMenuOpen(!menuOpen)}
+            style={{ background: "transparent", border: `1px solid ${colors.border}`, borderRadius: 8, padding: "6px 10px", cursor: "pointer", color: colors.text, fontSize: 18 }}>
+            {menuOpen ? "✕" : "☰"}
+          </button>
+        )}
       </div>
 
-      <div className={`mmu-nav-mobile-panel${menuOpen ? " open" : ""}`}>
-        <div className="mmu-nav-mobile-links">
+      {/* Mobile dropdown menu */}
+      {isMobile && menuOpen && (
+        <div style={{ background: colors.card, borderTop: `1px solid ${colors.border}`, padding: 12 }}>
+          {/* User info */}
+          <div style={{ padding: "10px 12px", marginBottom: 8, background: colors.cardAlt, borderRadius: 10 }}>
+            <div style={{ fontSize: 13, fontWeight: 600, color: colors.white }}>{user?.full_name}</div>
+            <div style={{ fontSize: 11, color: colors.textMuted }}>{user?.student_id} · {user?.role}</div>
+          </div>
+          {/* Nav items */}
           {navItems.map(item => (
-            <button key={item.key} onClick={() => navigate(item.key)} style={navButtonStyle(item.key)}>
+            <button key={item.key} onClick={() => handleNav(item.key)}
+              style={{ ...baseStyles.btn, width: "100%", justifyContent: "flex-start", marginBottom: 4, background: currentView === item.key ? `${colors.accent}22` : "transparent", color: currentView === item.key ? colors.accent : colors.textDim, border: currentView === item.key ? `1px solid ${colors.accent}44` : "1px solid transparent" }}>
               <span>{item.icon}</span> {item.label}
             </button>
           ))}
-        </div>
-        <div className="mmu-nav-mobile-user">
-          <div>
-            <div style={{ fontSize: 14, fontWeight: 600, color: colors.text }}>{user?.full_name}</div>
-            <div style={{ fontSize: 12, color: colors.textMuted, marginTop: 2 }}>{user?.student_id} · {user?.role}</div>
-          </div>
-          <button onClick={() => { logout(); setMenuOpen(false); }} style={{ ...baseStyles.btn, ...baseStyles.btnOutline, padding: "10px 14px", fontSize: 13 }}>
+          <button onClick={() => { logout(); setMenuOpen(false); }}
+            style={{ ...baseStyles.btn, ...baseStyles.btnOutline, width: "100%", justifyContent: "center", marginTop: 8 }}>
             Logout
           </button>
         </div>
-      </div>
+      )}
     </nav>
   );
 };
@@ -265,6 +268,7 @@ const Navbar = ({ currentView, setView }) => {
 // ═══════════════════════════════════════════════════════════════
 const LoginPage = () => {
   const { login, register, loading } = useAuth();
+  const isMobile = useIsMobile();
   const [isRegister, setIsRegister] = useState(false);
   const [form, setForm] = useState({ student_id: "", password: "", full_name: "", email: "", faculty: "", department: "" });
   const [error, setError] = useState("");
@@ -273,35 +277,27 @@ const LoginPage = () => {
     e.preventDefault();
     setError("");
     try {
-      if (isRegister) {
-        await register(form);
-      } else {
-        await login(form.student_id, form.password);
-      }
-    } catch (err) {
-      setError(err.message);
-    }
+      if (isRegister) { await register(form); }
+      else { await login(form.student_id, form.password); }
+    } catch (err) { setError(err.message); }
   };
 
   const set = (k) => (e) => setForm(f => ({ ...f, [k]: e.target.value }));
 
   return (
-    <div className="mmu-login-page" style={{ ...baseStyles.page }}>
-      <div style={{ position: "absolute", inset: 0, overflow: "hidden", pointerEvents: "none" }}>
-        <div style={{ position: "absolute", top: "10%", left: "15%", width: 400, height: 400, borderRadius: "50%", background: `radial-gradient(circle, ${colors.accent}08, transparent)` }} />
-        <div style={{ position: "absolute", bottom: "10%", right: "15%", width: 500, height: 500, borderRadius: "50%", background: `radial-gradient(circle, ${colors.accent}06, transparent)` }} />
-      </div>
-
-      <div className="mmu-login-wrap" style={{ position: "relative", zIndex: 1 }}>
-        <div style={{ textAlign: "center", marginBottom: 32 }}>
-          <div style={{ width: 72, height: 72, borderRadius: 18, overflow: "hidden", display: "inline-flex", alignItems: "center", justifyContent: "center", marginBottom: 16, boxShadow: `0 8px 32px ${colors.accent}33` }}><img src="/mmu-logo.png" alt="MMU" style={{ width: 72, height: 72, objectFit: "contain" }} /></div>
-          <h1 style={{ fontSize: 28, fontWeight: 800, color: colors.white, margin: 0 }}>MMU E-Vote</h1>
-          <p style={{ color: colors.textMuted, fontSize: 14, margin: "8px 0 0" }}>Smart Contract-Based Voting System</p>
-          <p style={{ color: colors.textMuted, fontSize: 12 }}>Multimedia University of Kenya</p>
+    <div style={{ ...baseStyles.page, display: "flex", alignItems: "center", justifyContent: "center", padding: "20px 16px" }}>
+      <div style={{ width: "100%", maxWidth: 420, position: "relative", zIndex: 1 }}>
+        <div style={{ textAlign: "center", marginBottom: 24 }}>
+          <div style={{ width: 64, height: 64, borderRadius: 16, overflow: "hidden", display: "inline-flex", alignItems: "center", justifyContent: "center", marginBottom: 12, boxShadow: `0 8px 32px ${colors.accent}33` }}>
+            <img src="/mmu-logo.png" alt="MMU" style={{ width: 64, height: 64, objectFit: "contain" }} />
+          </div>
+          <h1 style={{ fontSize: isMobile ? 22 : 26, fontWeight: 800, color: colors.white, margin: 0 }}>MMU E-Vote</h1>
+          <p style={{ color: colors.textMuted, fontSize: 13, margin: "6px 0 0" }}>Smart Contract-Based Voting System</p>
+          <p style={{ color: colors.textMuted, fontSize: 11 }}>Multimedia University of Kenya</p>
         </div>
 
         <div style={baseStyles.card}>
-          <div style={{ display: "flex", marginBottom: 24, background: colors.cardAlt, borderRadius: 10, padding: 4 }}>
+          <div style={{ display: "flex", marginBottom: 20, background: colors.cardAlt, borderRadius: 10, padding: 4 }}>
             <button onClick={() => setIsRegister(false)} style={{ ...baseStyles.btn, flex: 1, justifyContent: "center", background: !isRegister ? colors.accent : "transparent", color: !isRegister ? colors.white : colors.textDim, borderRadius: 8, fontSize: 13 }}>Sign In</button>
             <button onClick={() => setIsRegister(true)} style={{ ...baseStyles.btn, flex: 1, justifyContent: "center", background: isRegister ? colors.accent : "transparent", color: isRegister ? colors.white : colors.textDim, borderRadius: 8, fontSize: 13 }}>Register</button>
           </div>
@@ -309,35 +305,35 @@ const LoginPage = () => {
           {error && <Alert type="error">{error}</Alert>}
 
           <form onSubmit={handleSubmit}>
-            <div style={{ marginBottom: 16 }}>
+            <div style={{ marginBottom: 14 }}>
               <label style={baseStyles.label}>Student ID</label>
               <input style={baseStyles.input} placeholder="e.g. CIT-222-001/2021" value={form.student_id} onChange={set("student_id")} required />
             </div>
 
             {isRegister && (
               <>
-                <div style={{ marginBottom: 16 }}>
+                <div style={{ marginBottom: 14 }}>
                   <label style={baseStyles.label}>Full Name</label>
                   <input style={baseStyles.input} placeholder="Your full name" value={form.full_name} onChange={set("full_name")} required />
                 </div>
-                <div style={{ marginBottom: 16 }}>
+                <div style={{ marginBottom: 14 }}>
                   <label style={baseStyles.label}>Email</label>
                   <input style={baseStyles.input} type="email" placeholder="your.email@students.mmu.ac.ke" value={form.email} onChange={set("email")} required />
                 </div>
-                <div className="mmu-grid-2" style={{ marginBottom: 16 }}>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 14 }}>
                   <div>
                     <label style={baseStyles.label}>Faculty</label>
-                    <input style={baseStyles.input} placeholder="e.g. Computing & IT" value={form.faculty} onChange={set("faculty")} />
+                    <input style={baseStyles.input} placeholder="Computing & IT" value={form.faculty} onChange={set("faculty")} />
                   </div>
                   <div>
                     <label style={baseStyles.label}>Department</label>
-                    <input style={baseStyles.input} placeholder="e.g. Computer Tech" value={form.department} onChange={set("department")} />
+                    <input style={baseStyles.input} placeholder="Computer Tech" value={form.department} onChange={set("department")} />
                   </div>
                 </div>
               </>
             )}
 
-            <div style={{ marginBottom: 24 }}>
+            <div style={{ marginBottom: 20 }}>
               <label style={baseStyles.label}>Password</label>
               <input style={baseStyles.input} type="password" placeholder="••••••••" value={form.password} onChange={set("password")} required />
             </div>
@@ -348,7 +344,7 @@ const LoginPage = () => {
             </button>
           </form>
 
-          <div style={{ textAlign: "center", marginTop: 20, padding: "16px 0 0", borderTop: `1px solid ${colors.border}` }}>
+          <div style={{ textAlign: "center", marginTop: 16, padding: "14px 0 0", borderTop: `1px solid ${colors.border}` }}>
             <div style={{ fontSize: 11, color: colors.textMuted, display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
               <span style={{ display: "inline-block", width: 8, height: 8, borderRadius: "50%", background: colors.accent }} />
               Secured by Ethereum Blockchain
@@ -365,6 +361,7 @@ const LoginPage = () => {
 // ═══════════════════════════════════════════════════════════════
 const Dashboard = ({ setView, setSelectedElection }) => {
   const { user } = useAuth();
+  const isMobile = useIsMobile();
   const [stats, setStats] = useState(null);
   const [elections, setElections] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -372,15 +369,10 @@ const Dashboard = ({ setView, setSelectedElection }) => {
   useEffect(() => {
     const load = async () => {
       try {
-        const [s, e] = await Promise.all([
-          api.get("/voting/dashboard/"),
-          api.get("/voting/elections/"),
-        ]);
-        setStats(s);
-        setElections(e);
-      } catch (err) {
-        console.error(err);
-      } finally { setLoading(false); }
+        const [s, e] = await Promise.all([api.get("/voting/dashboard/"), api.get("/voting/elections/")]);
+        setStats(s); setElections(e);
+      } catch (err) { console.error(err); }
+      finally { setLoading(false); }
     };
     load();
   }, []);
@@ -388,15 +380,19 @@ const Dashboard = ({ setView, setSelectedElection }) => {
   if (loading) return <LoadingSpinner />;
 
   const activeElections = elections.filter(e => e.status === "voting" || e.status === "registration");
+  const container = { maxWidth: 1200, margin: "0 auto", padding: isMobile ? "16px 12px" : "24px 24px" };
 
   return (
-    <div className="mmu-container" style={baseStyles.container}>
-      <div style={{ marginBottom: 28 }}>
-        <h1 className="mmu-page-title" style={{ fontSize: 26, fontWeight: 800, color: colors.white, margin: 0 }}>Welcome back, {user?.full_name?.split(" ")[0]}</h1>
-        <p style={{ color: colors.textMuted, margin: "4px 0 0", fontSize: 14 }}>Here's your voting overview</p>
+    <div style={container}>
+      <div style={{ marginBottom: 20 }}>
+        <h1 style={{ fontSize: isMobile ? 20 : 24, fontWeight: 800, color: colors.white, margin: 0 }}>
+          Welcome, {user?.full_name?.split(" ")[0]}
+        </h1>
+        <p style={{ color: colors.textMuted, margin: "4px 0 0", fontSize: 13 }}>Your voting overview</p>
       </div>
 
-      <div className="mmu-grid-4">
+      {/* Stats grid — 2x2 on mobile, 4 cols on desktop */}
+      <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr 1fr" : "repeat(4, 1fr)", gap: 12, marginBottom: 16 }}>
         <StatCard icon="🗳️" value={stats?.total_elections || 0} label="Total Elections" />
         <StatCard icon="🟢" value={stats?.active_elections || 0} label="Active Now" />
         <StatCard icon="👥" value={stats?.total_voters || 0} label="Registered Voters" />
@@ -404,23 +400,20 @@ const Dashboard = ({ setView, setSelectedElection }) => {
       </div>
 
       {activeElections.length > 0 && (
-        <div className="mmu-card" style={baseStyles.card}>
-          <div style={baseStyles.cardHeader}>
-            <span>🔴</span> Active Elections
-          </div>
+        <div style={baseStyles.card}>
+          <div style={baseStyles.cardHeader}><span>🔴</span> Active Elections</div>
           {activeElections.map(election => (
-            <div key={election.id} className="mmu-stack-mobile" style={{ background: colors.cardAlt, borderRadius: 12, padding: 20, marginBottom: 12, border: `1px solid ${colors.border}` }}>
-              <div>
-                <h3 style={{ fontSize: 16, fontWeight: 700, color: colors.white, margin: 0 }}>{election.title}</h3>
-                <p style={{ fontSize: 13, color: colors.textDim, margin: "6px 0", maxWidth: 500 }}>{election.description?.substring(0, 120)}...</p>
-                <div className="mmu-meta-row" style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
-                  <StatusBadge status={election.status} />
-                  <span style={{ fontSize: 12, color: colors.textMuted }}>📊 {election.total_votes} votes · 👥 {election.total_voters} registered · 🏷️ {election.candidates?.length} candidates</span>
-                </div>
+            <div key={election.id} style={{ background: colors.cardAlt, borderRadius: 12, padding: 16, marginBottom: 10, border: `1px solid ${colors.border}` }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8 }}>
+                <h3 style={{ fontSize: 15, fontWeight: 700, color: colors.white, margin: 0, flex: 1, paddingRight: 8 }}>{election.title}</h3>
+                <StatusBadge status={election.status} />
+              </div>
+              <p style={{ fontSize: 13, color: colors.textDim, margin: "0 0 10px" }}>{election.description?.substring(0, 100)}...</p>
+              <div style={{ fontSize: 12, color: colors.textMuted, marginBottom: 12 }}>
+                📊 {election.total_votes} votes · 👥 {election.total_voters} registered · 🏷️ {election.candidates?.length} candidates
               </div>
               <button onClick={() => { setSelectedElection(election); setView("election-detail"); }}
-                className="mmu-full-width-mobile"
-                style={{ ...baseStyles.btn, ...baseStyles.btnPrimary, whiteSpace: "nowrap" }}>
+                style={{ ...baseStyles.btn, ...baseStyles.btnPrimary, width: isMobile ? "100%" : "auto", justifyContent: "center", fontSize: 13 }}>
                 {election.status === "voting" ? "Vote Now →" : "View →"}
               </button>
             </div>
@@ -428,35 +421,48 @@ const Dashboard = ({ setView, setSelectedElection }) => {
         </div>
       )}
 
-      <div className="mmu-card" style={baseStyles.card}>
+      {/* All elections — card list on mobile, table on desktop */}
+      <div style={baseStyles.card}>
         <div style={baseStyles.cardHeader}><span>📜</span> All Elections</div>
         {elections.length === 0 ? (
           <p style={{ color: colors.textMuted, textAlign: "center", padding: 20 }}>No elections found</p>
+        ) : isMobile ? (
+          elections.map(e => (
+            <div key={e.id} onClick={() => { setSelectedElection(e); setView("election-detail"); }}
+              style={{ background: colors.cardAlt, borderRadius: 10, padding: 14, marginBottom: 10, border: `1px solid ${colors.border}`, cursor: "pointer" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
+                <span style={{ fontWeight: 600, color: colors.white, fontSize: 14 }}>{e.title}</span>
+                <span style={{ color: colors.accent }}>→</span>
+              </div>
+              <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+                <StatusBadge status={e.status} />
+                <span style={{ fontSize: 11, color: colors.textMuted }}>👤 {e.candidates?.length} · 🗳️ {e.total_votes}</span>
+              </div>
+            </div>
+          ))
         ) : (
-          <div className="mmu-table-wrap">
-          <table style={{ width: "100%", borderCollapse: "collapse" }}>
-            <thead>
-              <tr style={{ borderBottom: `1px solid ${colors.border}` }}>
-                {["Title", "Status", "Candidates", "Voters", "Votes", ""].map(h => (
-                  <th key={h} style={{ padding: "10px 12px", textAlign: "left", fontSize: 11, color: colors.textMuted, textTransform: "uppercase", letterSpacing: 1 }}>{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {elections.map(e => (
-                <tr key={e.id} style={{ borderBottom: `1px solid ${colors.border}22`, cursor: "pointer" }} onClick={() => { setSelectedElection(e); setView("election-detail"); }}>
-                  <td style={{ padding: "14px 12px", fontWeight: 600, color: colors.white }}>{e.title}</td>
-                  <td style={{ padding: "14px 12px" }}><StatusBadge status={e.status} /></td>
-                  <td style={{ padding: "14px 12px", color: colors.textDim }}>{e.candidates?.length || 0}</td>
-                  <td style={{ padding: "14px 12px", color: colors.textDim }}>{e.total_voters}</td>
-                  <td style={{ padding: "14px 12px", color: colors.textDim }}>{e.total_votes}</td>
-                  <td style={{ padding: "14px 12px" }}>
-                    <span style={{ color: colors.accent, fontSize: 13 }}>View →</span>
-                  </td>
+          <div style={{ overflowX: "auto" }}>
+            <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 500 }}>
+              <thead>
+                <tr style={{ borderBottom: `1px solid ${colors.border}` }}>
+                  {["Title", "Status", "Candidates", "Voters", "Votes", ""].map(h => (
+                    <th key={h} style={{ padding: "10px 12px", textAlign: "left", fontSize: 11, color: colors.textMuted, textTransform: "uppercase", letterSpacing: 1 }}>{h}</th>
+                  ))}
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {elections.map(e => (
+                  <tr key={e.id} style={{ borderBottom: `1px solid ${colors.border}22`, cursor: "pointer" }} onClick={() => { setSelectedElection(e); setView("election-detail"); }}>
+                    <td style={{ padding: "12px", fontWeight: 600, color: colors.white }}>{e.title}</td>
+                    <td style={{ padding: "12px" }}><StatusBadge status={e.status} /></td>
+                    <td style={{ padding: "12px", color: colors.textDim }}>{e.candidates?.length || 0}</td>
+                    <td style={{ padding: "12px", color: colors.textDim }}>{e.total_voters}</td>
+                    <td style={{ padding: "12px", color: colors.textDim }}>{e.total_votes}</td>
+                    <td style={{ padding: "12px" }}><span style={{ color: colors.accent, fontSize: 13 }}>View →</span></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         )}
       </div>
@@ -469,6 +475,7 @@ const Dashboard = ({ setView, setSelectedElection }) => {
 // ═══════════════════════════════════════════════════════════════
 const ElectionDetail = ({ election: initialElection, setView }) => {
   const { user } = useAuth();
+  const isMobile = useIsMobile();
   const [election, setElection] = useState(initialElection);
   const [myStatus, setMyStatus] = useState(null);
   const [selectedCandidate, setSelectedCandidate] = useState(null);
@@ -478,19 +485,17 @@ const ElectionDetail = ({ election: initialElection, setView }) => {
   const [error, setError] = useState("");
   const [results, setResults] = useState(null);
 
+  const container = { maxWidth: 1200, margin: "0 auto", padding: isMobile ? "16px 12px" : "24px 24px" };
+
   const load = useCallback(async () => {
     try {
       const [e, s] = await Promise.all([
         api.get(`/voting/elections/${election.id}/`),
         api.get(`/voting/elections/${election.id}/my-status/`),
       ]);
-      setElection(e);
-      setMyStatus(s);
+      setElection(e); setMyStatus(s);
       if (e.status === "ended" || e.status === "results_published") {
-        try {
-          const r = await api.get(`/voting/elections/${election.id}/results/`);
-          setResults(r);
-        } catch (err) {}
+        try { const r = await api.get(`/voting/elections/${election.id}/results/`); setResults(r); } catch (err) {}
       }
     } catch (err) { console.error(err); }
   }, [election.id]);
@@ -499,10 +504,8 @@ const ElectionDetail = ({ election: initialElection, setView }) => {
 
   const handleRegister = async () => {
     setLoading(true); setError("");
-    try {
-      await api.post(`/voting/elections/${election.id}/register/`, {});
-      await load();
-    } catch (err) { setError(err.message); }
+    try { await api.post(`/voting/elections/${election.id}/register/`, {}); await load(); }
+    catch (err) { setError(err.message); }
     finally { setLoading(false); }
   };
 
@@ -510,9 +513,7 @@ const ElectionDetail = ({ election: initialElection, setView }) => {
     setLoading(true); setError("");
     try {
       const result = await api.post(`/voting/elections/${election.id}/vote/`, { candidate_id: selectedCandidate.ballot_number });
-      setVoteResult(result);
-      setConfirmVote(false);
-      await load();
+      setVoteResult(result); setConfirmVote(false); await load();
     } catch (err) { setError(err.message); }
     finally { setLoading(false); }
   };
@@ -520,47 +521,41 @@ const ElectionDetail = ({ election: initialElection, setView }) => {
   const totalVotesResult = results?.results?.reduce((s, r) => s + r.vote_count, 0) || results?.total_votes || 0;
 
   return (
-    <div className="mmu-container" style={baseStyles.container}>
-      <button onClick={() => setView("elections")} style={{ ...baseStyles.btn, ...baseStyles.btnOutline, marginBottom: 20, fontSize: 13 }}>← Back to Elections</button>
+    <div style={container}>
+      <button onClick={() => setView("elections")} style={{ ...baseStyles.btn, ...baseStyles.btnOutline, marginBottom: 16, fontSize: 13 }}>← Back</button>
 
-      <div className="mmu-card" style={baseStyles.card}>
-        <div className="mmu-flex-between-start">
-          <div>
-            <h1 className="mmu-election-title" style={{ fontSize: 24, fontWeight: 800, color: colors.white, margin: 0 }}>{election.title}</h1>
-            <p style={{ color: colors.textDim, margin: "8px 0", fontSize: 14 }}>{election.description}</p>
+      {/* Header card */}
+      <div style={baseStyles.card}>
+        <div style={{ marginBottom: 12 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 8, marginBottom: 6 }}>
+            <h1 style={{ fontSize: isMobile ? 18 : 22, fontWeight: 800, color: colors.white, margin: 0 }}>{election.title}</h1>
+            <StatusBadge status={election.status} />
           </div>
-          <StatusBadge status={election.status} />
+          <p style={{ color: colors.textDim, margin: 0, fontSize: 13 }}>{election.description}</p>
         </div>
-
-        <div className="mmu-grid-4" style={{ marginTop: 20, padding: "16px 0", borderTop: `1px solid ${colors.border}` }}>
-          <div style={baseStyles.stat}>
-            <div style={{ fontSize: 24, fontWeight: 800, color: colors.accent }}>{election.candidates?.length || 0}</div>
-            <div style={baseStyles.statLabel}>Candidates</div>
-          </div>
-          <div style={baseStyles.stat}>
-            <div style={{ fontSize: 24, fontWeight: 800, color: colors.gold }}>{election.total_voters}</div>
-            <div style={baseStyles.statLabel}>Registered</div>
-          </div>
-          <div style={baseStyles.stat}>
-            <div style={{ fontSize: 24, fontWeight: 800, color: colors.purple }}>{election.total_votes}</div>
-            <div style={baseStyles.statLabel}>Votes Cast</div>
-          </div>
-          <div style={baseStyles.stat}>
-            <div style={{ fontSize: 24, fontWeight: 800, color: colors.warning }}>
-              {election.total_voters > 0 ? Math.round(election.total_votes / election.total_voters * 100) : 0}%
+        {/* Stats — 2x2 on mobile, 4 cols on desktop */}
+        <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr 1fr" : "repeat(4, 1fr)", gap: 8, paddingTop: 14, borderTop: `1px solid ${colors.border}` }}>
+          {[
+            { val: election.candidates?.length || 0, label: "Candidates", color: colors.accent },
+            { val: election.total_voters, label: "Registered", color: colors.gold },
+            { val: election.total_votes, label: "Votes Cast", color: colors.purple },
+            { val: `${election.total_voters > 0 ? Math.round(election.total_votes / election.total_voters * 100) : 0}%`, label: "Turnout", color: colors.warning },
+          ].map(({ val, label, color }) => (
+            <div key={label} style={{ textAlign: "center", padding: "10px 0" }}>
+              <div style={{ fontSize: 22, fontWeight: 800, color }}>{val}</div>
+              <div style={{ fontSize: 11, color: colors.textMuted, textTransform: "uppercase", letterSpacing: 1 }}>{label}</div>
             </div>
-            <div style={baseStyles.statLabel}>Turnout</div>
-          </div>
+          ))}
         </div>
       </div>
 
       {error && <Alert type="error">{error}</Alert>}
 
-      {/* Voter Status & Registration */}
+      {/* Voter Status */}
       {user?.role === "voter" && (
-        <div className="mmu-card" style={baseStyles.card}>
+        <div style={baseStyles.card}>
           <div style={baseStyles.cardHeader}><span>📋</span> Your Voting Status</div>
-          <div style={{ display: "flex", gap: 16, alignItems: "center", marginBottom: 16, flexWrap: "wrap" }}>
+          <div style={{ display: "flex", gap: 10, alignItems: "center", marginBottom: 14, flexWrap: "wrap" }}>
             <span style={baseStyles.badge(myStatus?.is_registered ? colors.accent : colors.textMuted)}>
               {myStatus?.is_registered ? "✅ Registered" : "⬜ Not Registered"}
             </span>
@@ -571,70 +566,64 @@ const ElectionDetail = ({ election: initialElection, setView }) => {
 
           {!user?.is_eligible && (
             <Alert type="warning">
-              Your account is not marked as eligible to vote. Contact an electoral administrator to approve your eligibility before registering for elections.
+              ⚠️ Your account is not yet marked eligible to vote. Please contact an electoral administrator to have your eligibility confirmed before you can register.
             </Alert>
           )}
 
-          {/* Register button — shown in registration OR voting phase if eligible and not registered */}
           {user?.is_eligible && (election.status === "registration" || election.status === "voting") && !myStatus?.is_registered && (
             <div>
-              <p style={{ color: colors.textDim, fontSize: 13, marginBottom: 12 }}>You must register before you can vote in this election.</p>
+              <p style={{ color: colors.textDim, fontSize: 13, marginBottom: 10 }}>Register before you can vote.</p>
               <button onClick={handleRegister} disabled={loading}
-                style={{ ...baseStyles.btn, ...baseStyles.btnPrimary, opacity: loading ? 0.7 : 1, padding: "14px 32px", fontSize: 15 }}>
+                style={{ ...baseStyles.btn, ...baseStyles.btnPrimary, width: isMobile ? "100%" : "auto", justifyContent: "center", opacity: loading ? 0.7 : 1 }}>
                 {loading ? "Registering..." : "📝 Register to Vote"}
               </button>
             </div>
           )}
 
-          {/* Registration success message */}
           {myStatus?.is_registered && !myStatus?.has_voted && election.status === "voting" && (
             <Alert type="info">You are registered! Select a candidate below to cast your vote.</Alert>
           )}
 
           {myStatus?.has_voted && myStatus?.transaction_hash && (
             <Alert type="success">
-              Your vote has been recorded! Transaction: <code style={{ fontSize: 12, background: colors.cardAlt, padding: "2px 6px", borderRadius: 4 }}>{myStatus.transaction_hash}</code>
+              Vote recorded! Transaction: <span style={{ fontFamily: "monospace", fontSize: 11, wordBreak: "break-all" }}>{myStatus.transaction_hash}</span>
             </Alert>
           )}
         </div>
       )}
 
-      {/* Vote Result */}
+      {/* Vote result */}
       {voteResult && (
-        <div style={{ ...baseStyles.card, border: `2px solid ${colors.accent}`, background: `linear-gradient(135deg, ${colors.accentDim}22, ${colors.card})` }}>
-          <div style={{ textAlign: "center", padding: 20 }}>
-            <div style={{ fontSize: 48, marginBottom: 12 }}>✅</div>
-            <h2 style={{ fontSize: 22, fontWeight: 800, color: colors.accent, margin: 0 }}>Vote Cast Successfully!</h2>
-            <p style={{ color: colors.textDim, margin: "12px 0" }}>Your vote has been securely recorded on the blockchain</p>
-            <div style={{ background: colors.cardAlt, borderRadius: 10, padding: 16, marginTop: 16, fontFamily: "monospace", fontSize: 13, color: colors.text, wordBreak: "break-all" }}>
-              <div style={{ fontSize: 11, color: colors.textMuted, marginBottom: 6 }}>TRANSACTION HASH (Your Cryptographic Receipt)</div>
+        <div style={{ ...baseStyles.card, border: `2px solid ${colors.accent}` }}>
+          <div style={{ textAlign: "center", padding: "10px 0" }}>
+            <div style={{ fontSize: 44, marginBottom: 10 }}>✅</div>
+            <h2 style={{ fontSize: 20, fontWeight: 800, color: colors.accent, margin: 0 }}>Vote Cast Successfully!</h2>
+            <p style={{ color: colors.textDim, margin: "10px 0", fontSize: 13 }}>Your vote is securely recorded on the blockchain</p>
+            <div style={{ background: colors.cardAlt, borderRadius: 10, padding: 14, marginTop: 12, fontFamily: "monospace", fontSize: 12, color: colors.text, wordBreak: "break-all" }}>
+              <div style={{ fontSize: 10, color: colors.textMuted, marginBottom: 4 }}>TRANSACTION HASH</div>
               {voteResult.transaction_hash}
             </div>
-            <p style={{ fontSize: 12, color: colors.textMuted, marginTop: 12 }}>Save this hash to verify your vote later using the Verify Vote feature.</p>
+            <p style={{ fontSize: 11, color: colors.textMuted, marginTop: 10 }}>Save this hash to verify your vote later.</p>
           </div>
         </div>
       )}
 
-      {/* Candidates — clickable after registration during voting phase */}
+      {/* Voting candidates */}
       {election.status === "voting" && myStatus?.is_registered && !myStatus?.has_voted && !voteResult && (
         <div style={baseStyles.card}>
           <div style={baseStyles.cardHeader}><span>🗳️</span> Cast Your Vote</div>
-          <p style={{ color: colors.textDim, fontSize: 13, marginBottom: 20 }}>Click on a candidate to select them, then confirm your vote. This action is irreversible.</p>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: 16 }}>
+          <p style={{ color: colors.textDim, fontSize: 13, marginBottom: 16 }}>Tap a candidate to select, then confirm. This is irreversible.</p>
+          <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "repeat(auto-fill, minmax(280px, 1fr))", gap: 12 }}>
             {election.candidates?.map(c => (
               <div key={c.id} onClick={() => { setSelectedCandidate(c); setConfirmVote(false); }}
-                style={{
-                  background: selectedCandidate?.id === c.id ? `${colors.accent}15` : colors.cardAlt,
-                  border: `2px solid ${selectedCandidate?.id === c.id ? colors.accent : colors.border}`,
-                  borderRadius: 14, padding: 20, cursor: "pointer", transition: "all 0.2s",
-                }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 12 }}>
-                  <div style={{ width: 48, height: 48, borderRadius: 12, background: `linear-gradient(135deg, ${[colors.accent, colors.accent, colors.accentBright, colors.warning][c.ballot_number % 4]}, ${colors.cardAlt})`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, fontWeight: 800, color: colors.white }}>{c.ballot_number}</div>
-                  <div>
-                    <div style={{ fontSize: 16, fontWeight: 700, color: colors.white }}>{c.full_name}</div>
-                    <div style={{ fontSize: 12, color: colors.textMuted }}>{c.position}</div>
+                style={{ background: selectedCandidate?.id === c.id ? `${colors.accent}15` : colors.cardAlt, border: `2px solid ${selectedCandidate?.id === c.id ? colors.accent : colors.border}`, borderRadius: 14, padding: 16, cursor: "pointer", transition: "all 0.2s" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 10 }}>
+                  <div style={{ width: 44, height: 44, borderRadius: 10, background: `linear-gradient(135deg, ${colors.accent}, ${colors.cardAlt})`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, fontWeight: 800, color: colors.white, flexShrink: 0 }}>{c.ballot_number}</div>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontSize: 15, fontWeight: 700, color: colors.white }}>{c.full_name}</div>
+                    <div style={{ fontSize: 11, color: colors.textMuted }}>{c.position}</div>
                   </div>
-                  {selectedCandidate?.id === c.id && <span style={{ marginLeft: "auto", fontSize: 22 }}>✅</span>}
+                  {selectedCandidate?.id === c.id && <span style={{ fontSize: 20 }}>✅</span>}
                 </div>
                 <p style={{ fontSize: 13, color: colors.textDim, margin: 0, lineHeight: 1.5 }}>{c.manifesto_summary}</p>
               </div>
@@ -642,22 +631,23 @@ const ElectionDetail = ({ election: initialElection, setView }) => {
           </div>
 
           {selectedCandidate && !confirmVote && (
-            <div style={{ marginTop: 20, textAlign: "center" }}>
-              <button onClick={() => setConfirmVote(true)} style={{ ...baseStyles.btn, ...baseStyles.btnPrimary, padding: "14px 40px", fontSize: 15 }}>
-                Confirm Selection: {selectedCandidate.full_name} →
+            <div style={{ marginTop: 16, textAlign: "center" }}>
+              <button onClick={() => setConfirmVote(true)} style={{ ...baseStyles.btn, ...baseStyles.btnPrimary, width: isMobile ? "100%" : "auto", justifyContent: "center", padding: "12px 32px", fontSize: 14 }}>
+                Confirm: {selectedCandidate.full_name} →
               </button>
             </div>
           )}
 
           {confirmVote && (
-            <div style={{ marginTop: 20, background: `${colors.warning}15`, border: `1px solid ${colors.warning}44`, borderRadius: 12, padding: 24, textAlign: "center" }}>
-              <div style={{ fontSize: 20, marginBottom: 8 }}>⚠️</div>
-              <h3 style={{ color: colors.warning, margin: "0 0 8px" }}>Confirm Your Vote</h3>
-              <p style={{ color: colors.textDim, fontSize: 14 }}>You are about to vote for <strong style={{ color: colors.white }}>{selectedCandidate.full_name}</strong> (#{selectedCandidate.ballot_number}). This action cannot be undone.</p>
-              <div style={{ display: "flex", gap: 12, justifyContent: "center", marginTop: 16 }}>
-                <button onClick={() => setConfirmVote(false)} style={{ ...baseStyles.btn, ...baseStyles.btnOutline }}>Cancel</button>
-                <button onClick={handleVote} disabled={loading}
-                  style={{ ...baseStyles.btn, ...baseStyles.btnPrimary, opacity: loading ? 0.7 : 1 }}>
+            <div style={{ marginTop: 16, background: `${colors.warning}15`, border: `1px solid ${colors.warning}44`, borderRadius: 12, padding: 20, textAlign: "center" }}>
+              <div style={{ fontSize: 20, marginBottom: 6 }}>⚠️</div>
+              <h3 style={{ color: colors.warning, margin: "0 0 8px", fontSize: 16 }}>Confirm Your Vote</h3>
+              <p style={{ color: colors.textDim, fontSize: 13, margin: "0 0 16px" }}>
+                Vote for <strong style={{ color: colors.white }}>{selectedCandidate.full_name}</strong> (#{selectedCandidate.ballot_number})? Cannot be undone.
+              </p>
+              <div style={{ display: "flex", gap: 10, justifyContent: "center", flexWrap: "wrap" }}>
+                <button onClick={() => setConfirmVote(false)} style={{ ...baseStyles.btn, ...baseStyles.btnOutline, flex: isMobile ? 1 : "none" }}>Cancel</button>
+                <button onClick={handleVote} disabled={loading} style={{ ...baseStyles.btn, ...baseStyles.btnPrimary, opacity: loading ? 0.7 : 1, flex: isMobile ? 1 : "none", justifyContent: "center" }}>
                   {loading ? "Submitting..." : "🗳️ Cast Vote"}
                 </button>
               </div>
@@ -666,21 +656,21 @@ const ElectionDetail = ({ election: initialElection, setView }) => {
         </div>
       )}
 
-      {/* Candidates List — view only (not registered, already voted, or not voting phase) */}
+      {/* View-only candidates */}
       {(!voteResult && (election.status !== "voting" || myStatus?.has_voted || !myStatus?.is_registered)) && (
         <div style={baseStyles.card}>
           <div style={baseStyles.cardHeader}><span>👤</span> Candidates</div>
           {election.status === "voting" && !myStatus?.is_registered && (
-            <Alert type="warning">Register above to unlock voting. You can view the candidates below.</Alert>
+            <Alert type="warning">Register above to unlock voting.</Alert>
           )}
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 16 }}>
+          <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "repeat(auto-fill, minmax(260px, 1fr))", gap: 12 }}>
             {election.candidates?.map(c => (
-              <div key={c.id} style={{ background: colors.cardAlt, borderRadius: 12, padding: 18, border: `1px solid ${colors.border}` }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 10 }}>
-                  <div style={{ width: 40, height: 40, borderRadius: 10, background: `linear-gradient(135deg, ${[colors.accent, colors.accent, colors.accentBright][c.ballot_number % 3]}, ${colors.cardAlt})`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16, fontWeight: 800, color: colors.white }}>{c.ballot_number}</div>
+              <div key={c.id} style={{ background: colors.cardAlt, borderRadius: 12, padding: 16, border: `1px solid ${colors.border}` }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
+                  <div style={{ width: 38, height: 38, borderRadius: 9, background: `linear-gradient(135deg, ${colors.accent}, ${colors.cardAlt})`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 15, fontWeight: 800, color: colors.white, flexShrink: 0 }}>{c.ballot_number}</div>
                   <div>
-                    <div style={{ fontWeight: 700, color: colors.white }}>{c.full_name}</div>
-                    <div style={{ fontSize: 12, color: colors.textMuted }}>{c.position}</div>
+                    <div style={{ fontWeight: 700, color: colors.white, fontSize: 14 }}>{c.full_name}</div>
+                    <div style={{ fontSize: 11, color: colors.textMuted }}>{c.position}</div>
                   </div>
                 </div>
                 <p style={{ fontSize: 13, color: colors.textDim, margin: 0, lineHeight: 1.5 }}>{c.manifesto_summary}</p>
@@ -694,16 +684,20 @@ const ElectionDetail = ({ election: initialElection, setView }) => {
       {results?.results && (
         <div style={baseStyles.card}>
           <div style={baseStyles.cardHeader}><span>📊</span> Election Results</div>
-          <div style={{ fontSize: 12, color: colors.textMuted, marginBottom: 16 }}>Source: {results.source === "blockchain" ? "🔗 Blockchain Verified" : "🗄️ Database"}</div>
+          <div style={{ fontSize: 12, color: colors.textMuted, marginBottom: 14 }}>
+            {results.source === "blockchain" ? "🔗 Blockchain Verified" : "🗄️ Database"}
+          </div>
           {results.results.sort((a, b) => b.vote_count - a.vote_count).map((r, i) => (
-            <div key={r.candidate_id} style={{ marginBottom: 16 }}>
-              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
-                <span style={{ fontWeight: 600, color: i === 0 ? colors.accent : colors.text }}>
+            <div key={r.candidate_id} style={{ marginBottom: 14 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6, flexWrap: "wrap", gap: 4 }}>
+                <span style={{ fontWeight: 600, color: i === 0 ? colors.accent : colors.text, fontSize: 14 }}>
                   {i === 0 && "🏆 "}{r.name}
                 </span>
-                <span style={{ fontWeight: 700, color: colors.white }}>{r.vote_count} votes ({totalVotesResult > 0 ? Math.round(r.vote_count / totalVotesResult * 100) : 0}%)</span>
+                <span style={{ fontWeight: 700, color: colors.white, fontSize: 13 }}>
+                  {r.vote_count} votes ({totalVotesResult > 0 ? Math.round(r.vote_count / totalVotesResult * 100) : 0}%)
+                </span>
               </div>
-              <div style={{ height: 10, background: colors.cardAlt, borderRadius: 5, overflow: "hidden" }}>
+              <div style={{ height: 9, background: colors.cardAlt, borderRadius: 5, overflow: "hidden" }}>
                 <div style={{ height: "100%", borderRadius: 5, background: i === 0 ? `linear-gradient(90deg, ${colors.warning}, #e8b82a)` : `linear-gradient(90deg, ${colors.accentDim}, ${colors.accent})`, width: `${totalVotesResult > 0 ? (r.vote_count / totalVotesResult * 100) : 0}%`, transition: "width 1s ease" }} />
               </div>
             </div>
@@ -718,8 +712,10 @@ const ElectionDetail = ({ election: initialElection, setView }) => {
 // ELECTIONS LIST
 // ═══════════════════════════════════════════════════════════════
 const ElectionsList = ({ setView, setSelectedElection }) => {
+  const isMobile = useIsMobile();
   const [elections, setElections] = useState([]);
   const [loading, setLoading] = useState(true);
+  const container = { maxWidth: 1200, margin: "0 auto", padding: isMobile ? "16px 12px" : "24px 24px" };
 
   useEffect(() => {
     api.get("/voting/elections/").then(setElections).finally(() => setLoading(false));
@@ -728,24 +724,22 @@ const ElectionsList = ({ setView, setSelectedElection }) => {
   if (loading) return <LoadingSpinner />;
 
   return (
-    <div style={baseStyles.container}>
-      <h1 style={{ fontSize: 26, fontWeight: 800, color: colors.white, margin: "0 0 24px" }}>Elections</h1>
+    <div style={container}>
+      <h1 style={{ fontSize: isMobile ? 20 : 24, fontWeight: 800, color: colors.white, margin: "0 0 20px" }}>Elections</h1>
       {elections.length === 0 && <Alert type="info">No elections available yet.</Alert>}
       {elections.map(e => (
-        <div key={e.id} style={{ ...baseStyles.card, cursor: "pointer", transition: "border-color 0.2s" }}
+        <div key={e.id} style={{ ...baseStyles.card, cursor: "pointer" }}
           onClick={() => { setSelectedElection(e); setView("election-detail"); }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-            <div style={{ flex: 1 }}>
-              <h3 style={{ fontSize: 18, fontWeight: 700, color: colors.white, margin: 0 }}>{e.title}</h3>
-              <p style={{ fontSize: 13, color: colors.textDim, margin: "6px 0 12px" }}>{e.description?.substring(0, 150)}</p>
-              <div style={{ display: "flex", gap: 16, flexWrap: "wrap", alignItems: "center" }}>
-                <StatusBadge status={e.status} />
-                <span style={{ fontSize: 12, color: colors.textMuted }}>👤 {e.candidates?.length} candidates</span>
-                <span style={{ fontSize: 12, color: colors.textMuted }}>👥 {e.total_voters} registered</span>
-                <span style={{ fontSize: 12, color: colors.textMuted }}>🗳️ {e.total_votes} votes</span>
-              </div>
-            </div>
-            <span style={{ color: colors.accent, fontSize: 20, marginLeft: 16 }}>→</span>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 8, marginBottom: 8 }}>
+            <h3 style={{ fontSize: isMobile ? 15 : 17, fontWeight: 700, color: colors.white, margin: 0 }}>{e.title}</h3>
+            <span style={{ color: colors.accent, fontSize: 18, flexShrink: 0 }}>→</span>
+          </div>
+          <p style={{ fontSize: 13, color: colors.textDim, margin: "0 0 10px" }}>{e.description?.substring(0, 120)}</p>
+          <div style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" }}>
+            <StatusBadge status={e.status} />
+            <span style={{ fontSize: 12, color: colors.textMuted }}>👤 {e.candidates?.length}</span>
+            <span style={{ fontSize: 12, color: colors.textMuted }}>👥 {e.total_voters}</span>
+            <span style={{ fontSize: 12, color: colors.textMuted }}>🗳️ {e.total_votes}</span>
           </div>
         </div>
       ))}
@@ -757,64 +751,61 @@ const ElectionsList = ({ setView, setSelectedElection }) => {
 // VERIFY VOTE
 // ═══════════════════════════════════════════════════════════════
 const VerifyVote = () => {
+  const isMobile = useIsMobile();
   const [hash, setHash] = useState("");
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
+  const container = { maxWidth: 1200, margin: "0 auto", padding: isMobile ? "16px 12px" : "24px 24px" };
 
   const verify = async (e) => {
     e.preventDefault();
     if (!hash.trim()) return;
     setLoading(true); setResult(null);
-    try {
-      const r = await api.post("/voting/verify/", { transaction_hash: hash.trim() });
-      setResult(r);
-    } catch (err) {
-      setResult({ error: err.message });
-    } finally { setLoading(false); }
+    try { const r = await api.post("/voting/verify/", { transaction_hash: hash.trim() }); setResult(r); }
+    catch (err) { setResult({ error: err.message }); }
+    finally { setLoading(false); }
   };
 
   return (
-    <div style={baseStyles.container}>
-      <div style={{ maxWidth: 640, margin: "0 auto" }}>
-        <div style={{ textAlign: "center", marginBottom: 32 }}>
-          <div style={{ fontSize: 48, marginBottom: 12 }}>🔍</div>
-          <h1 style={{ fontSize: 26, fontWeight: 800, color: colors.white, margin: 0 }}>Verify Your Vote</h1>
-          <p style={{ color: colors.textDim, margin: "8px 0 0" }}>Enter your transaction hash to verify your vote was recorded on the blockchain</p>
+    <div style={container}>
+      <div style={{ maxWidth: 600, margin: "0 auto" }}>
+        <div style={{ textAlign: "center", marginBottom: 24 }}>
+          <div style={{ fontSize: 42, marginBottom: 10 }}>🔍</div>
+          <h1 style={{ fontSize: isMobile ? 20 : 24, fontWeight: 800, color: colors.white, margin: 0 }}>Verify Your Vote</h1>
+          <p style={{ color: colors.textDim, margin: "8px 0 0", fontSize: 13 }}>Enter your transaction hash to verify your vote was recorded on the blockchain</p>
         </div>
 
         <div style={baseStyles.card}>
           <form onSubmit={verify}>
             <label style={baseStyles.label}>Transaction Hash</label>
-            <input style={{ ...baseStyles.input, fontFamily: "monospace", fontSize: 13 }} placeholder="0x..." value={hash} onChange={e => setHash(e.target.value)} />
+            <input style={{ ...baseStyles.input, fontFamily: "monospace", fontSize: 12 }} placeholder="0x..." value={hash} onChange={e => setHash(e.target.value)} />
             <button type="submit" disabled={loading}
-              style={{ ...baseStyles.btn, ...baseStyles.btnPrimary, width: "100%", justifyContent: "center", marginTop: 16, padding: 14 }}>
+              style={{ ...baseStyles.btn, ...baseStyles.btnPrimary, width: "100%", justifyContent: "center", marginTop: 14, padding: 14 }}>
               {loading ? "Verifying..." : "🔍 Verify Vote"}
             </button>
           </form>
 
           {result && !result.error && (
-            <div style={{ marginTop: 24, padding: 20, background: colors.cardAlt, borderRadius: 12 }}>
-              <h3 style={{ fontSize: 16, fontWeight: 700, color: colors.white, marginBottom: 16 }}>Verification Results</h3>
-              <div style={{ display: "grid", gap: 12 }}>
-                <div style={{ display: "flex", justifyContent: "space-between", padding: "8px 0", borderBottom: `1px solid ${colors.border}22` }}>
-                  <span style={{ color: colors.textMuted }}>Database Record</span>
-                  <span style={baseStyles.badge(result.database_verified ? colors.accent : colors.danger)}>
-                    {result.database_verified ? "✅ Verified" : "❌ Not Found"}
-                  </span>
-                </div>
-                <div style={{ display: "flex", justifyContent: "space-between", padding: "8px 0", borderBottom: `1px solid ${colors.border}22` }}>
-                  <span style={{ color: colors.textMuted }}>Blockchain Record</span>
-                  <span style={baseStyles.badge(result.blockchain_verified ? colors.accent : colors.warning)}>
-                    {result.blockchain_verified ? "✅ On-Chain" : "⚠️ Not on chain (may be simulated)"}
-                  </span>
-                </div>
-                {result.timestamp && (
-                  <div style={{ display: "flex", justifyContent: "space-between", padding: "8px 0" }}>
-                    <span style={{ color: colors.textMuted }}>Timestamp</span>
-                    <span style={{ color: colors.text }}>{new Date(result.timestamp).toLocaleString()}</span>
-                  </div>
-                )}
+            <div style={{ marginTop: 20, padding: 16, background: colors.cardAlt, borderRadius: 12 }}>
+              <h3 style={{ fontSize: 15, fontWeight: 700, color: colors.white, marginBottom: 14, marginTop: 0 }}>Verification Results</h3>
+              <div style={{ display: "flex", justifyContent: "space-between", padding: "10px 0", borderBottom: `1px solid ${colors.border}22`, alignItems: "center" }}>
+                <span style={{ color: colors.textMuted, fontSize: 13 }}>Database Record</span>
+                <span style={baseStyles.badge(result.database_verified ? colors.accent : colors.danger)}>
+                  {result.database_verified ? "✅ Verified" : "❌ Not Found"}
+                </span>
               </div>
+              <div style={{ display: "flex", justifyContent: "space-between", padding: "10px 0", borderBottom: `1px solid ${colors.border}22`, alignItems: "center" }}>
+                <span style={{ color: colors.textMuted, fontSize: 13 }}>Blockchain Record</span>
+                <span style={baseStyles.badge(result.blockchain_verified ? colors.accent : colors.warning)}>
+                  {result.blockchain_verified ? "✅ On-Chain" : "⚠️ Simulated"}
+                </span>
+              </div>
+              {result.timestamp && (
+                <div style={{ display: "flex", justifyContent: "space-between", padding: "10px 0", flexWrap: "wrap", gap: 4 }}>
+                  <span style={{ color: colors.textMuted, fontSize: 13 }}>Timestamp</span>
+                  <span style={{ color: colors.text, fontSize: 13 }}>{new Date(result.timestamp).toLocaleString()}</span>
+                </div>
+              )}
             </div>
           )}
           {result?.error && <Alert type="error">{result.error}</Alert>}
@@ -828,7 +819,7 @@ const VerifyVote = () => {
 // ADMIN PANEL
 // ═══════════════════════════════════════════════════════════════
 const AdminPanel = ({ setView, setSelectedElection }) => {
-  const { user } = useAuth();
+  const isMobile = useIsMobile();
   const [elections, setElections] = useState([]);
   const [showCreate, setShowCreate] = useState(false);
   const [newElection, setNewElection] = useState({ title: "", description: "" });
@@ -837,19 +828,14 @@ const AdminPanel = ({ setView, setSelectedElection }) => {
   const [activeTab, setActiveTab] = useState("elections");
   const [auditLogs, setAuditLogs] = useState([]);
   const [users, setUsers] = useState([]);
+  const container = { maxWidth: 1200, margin: "0 auto", padding: isMobile ? "16px 12px" : "24px 24px" };
 
   const loadData = async () => {
     try {
       const e = await api.get("/voting/elections/");
       setElections(e);
-      if (activeTab === "audit") {
-        const a = await api.get("/accounts/audit-logs/");
-        setAuditLogs(a.results || a);
-      }
-      if (activeTab === "users") {
-        const u = await api.get("/accounts/users/");
-        setUsers(u.results || u);
-      }
+      if (activeTab === "audit") { const a = await api.get("/accounts/audit-logs/"); setAuditLogs(a.results || a); }
+      if (activeTab === "users") { const u = await api.get("/accounts/users/"); setUsers(u.results || u); }
     } catch (err) { console.error(err); }
     finally { setLoading(false); }
   };
@@ -860,26 +846,15 @@ const AdminPanel = ({ setView, setSelectedElection }) => {
     e.preventDefault();
     try {
       await api.post("/voting/elections/", newElection);
-      setShowCreate(false);
-      setNewElection({ title: "", description: "" });
-      setMsg("Election created successfully!");
-      await loadData();
+      setShowCreate(false); setNewElection({ title: "", description: "" });
+      setMsg("Election created!"); await loadData();
     } catch (err) { setMsg("Error: " + err.message); }
   };
 
   const transitionPhase = async (electionId, action) => {
     try {
       await api.post(`/voting/elections/${electionId}/phase/${action}/`, {});
-      setMsg(`Election phase updated: ${action}`);
-      await loadData();
-    } catch (err) { setMsg("Error: " + err.message); }
-  };
-
-  const markEligible = async (studentId) => {
-    try {
-      const result = await api.post("/accounts/bulk-eligibility/", { student_ids: [studentId] });
-      setMsg(`Marked ${result.updated} user(s) as eligible`);
-      await loadData();
+      setMsg(`Election phase updated: ${action}`); await loadData();
     } catch (err) { setMsg("Error: " + err.message); }
   };
 
@@ -894,7 +869,14 @@ const AdminPanel = ({ setView, setSelectedElection }) => {
         full_name: name, position: position || "President",
         manifesto_summary: manifesto || "", ballot_number: parseInt(ballot) || 1,
       });
-      setMsg("Candidate added!");
+      setMsg("Candidate added!"); await loadData();
+    } catch (err) { setMsg("Error: " + err.message); }
+  };
+
+  const markEligible = async (studentId) => {
+    try {
+      await api.post("/accounts/bulk-eligibility/", { student_ids: [studentId], is_eligible: true });
+      setMsg("Voter marked eligible!");
       await loadData();
     } catch (err) { setMsg("Error: " + err.message); }
   };
@@ -908,41 +890,43 @@ const AdminPanel = ({ setView, setSelectedElection }) => {
   ];
 
   return (
-    <div style={baseStyles.container}>
-      <h1 style={{ fontSize: 26, fontWeight: 800, color: colors.white, margin: "0 0 24px" }}>Admin Panel</h1>
+    <div style={container}>
+      <h1 style={{ fontSize: isMobile ? 20 : 24, fontWeight: 800, color: colors.white, margin: "0 0 20px" }}>Admin Panel</h1>
 
       {msg && <Alert type={msg.startsWith("Error") ? "error" : "success"}>{msg}</Alert>}
 
-      <div style={{ display: "flex", gap: 4, marginBottom: 20, background: colors.card, borderRadius: 10, padding: 4, border: `1px solid ${colors.border}` }}>
+      {/* Tabs */}
+      <div style={{ display: "flex", gap: 4, marginBottom: 16, background: colors.card, borderRadius: 10, padding: 4, border: `1px solid ${colors.border}` }}>
         {tabs.map(t => (
           <button key={t.key} onClick={() => setActiveTab(t.key)}
-            style={{ ...baseStyles.btn, flex: 1, justifyContent: "center", background: activeTab === t.key ? colors.accent : "transparent", color: activeTab === t.key ? colors.white : colors.textDim, borderRadius: 8 }}>
-            {t.icon} {t.label}
+            style={{ ...baseStyles.btn, flex: 1, justifyContent: "center", background: activeTab === t.key ? colors.accent : "transparent", color: activeTab === t.key ? colors.white : colors.textDim, borderRadius: 8, fontSize: isMobile ? 12 : 14, padding: isMobile ? "8px 4px" : "10px 18px" }}>
+            <span>{t.icon}</span> {!isMobile && t.label}
+            {isMobile && <span style={{ fontSize: 10 }}>{t.label}</span>}
           </button>
         ))}
       </div>
 
       {activeTab === "elections" && (
         <>
-          <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 16 }}>
-            <button onClick={() => setShowCreate(!showCreate)} style={{ ...baseStyles.btn, ...baseStyles.btnPrimary }}>+ New Election</button>
+          <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 14 }}>
+            <button onClick={() => setShowCreate(!showCreate)} style={{ ...baseStyles.btn, ...baseStyles.btnPrimary, width: isMobile ? "100%" : "auto", justifyContent: "center" }}>+ New Election</button>
           </div>
 
           {showCreate && (
             <div style={baseStyles.card}>
-              <h3 style={{ color: colors.white, marginTop: 0 }}>Create Election</h3>
+              <h3 style={{ color: colors.white, marginTop: 0, fontSize: 16 }}>Create Election</h3>
               <form onSubmit={createElection}>
-                <div style={{ marginBottom: 16 }}>
+                <div style={{ marginBottom: 14 }}>
                   <label style={baseStyles.label}>Title</label>
                   <input style={baseStyles.input} value={newElection.title} onChange={e => setNewElection(p => ({ ...p, title: e.target.value }))} required />
                 </div>
-                <div style={{ marginBottom: 16 }}>
+                <div style={{ marginBottom: 14 }}>
                   <label style={baseStyles.label}>Description</label>
-                  <textarea style={{ ...baseStyles.input, minHeight: 80, resize: "vertical" }} value={newElection.description} onChange={e => setNewElection(p => ({ ...p, description: e.target.value }))} />
+                  <textarea style={{ ...baseStyles.input, minHeight: 70, resize: "vertical" }} value={newElection.description} onChange={e => setNewElection(p => ({ ...p, description: e.target.value }))} />
                 </div>
-                <div style={{ display: "flex", gap: 8 }}>
-                  <button type="submit" style={{ ...baseStyles.btn, ...baseStyles.btnPrimary }}>Create</button>
-                  <button type="button" onClick={() => setShowCreate(false)} style={{ ...baseStyles.btn, ...baseStyles.btnOutline }}>Cancel</button>
+                <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                  <button type="submit" style={{ ...baseStyles.btn, ...baseStyles.btnPrimary, flex: isMobile ? 1 : "none", justifyContent: "center" }}>Create</button>
+                  <button type="button" onClick={() => setShowCreate(false)} style={{ ...baseStyles.btn, ...baseStyles.btnOutline, flex: isMobile ? 1 : "none", justifyContent: "center" }}>Cancel</button>
                 </div>
               </form>
             </div>
@@ -950,9 +934,9 @@ const AdminPanel = ({ setView, setSelectedElection }) => {
 
           {elections.map(e => (
             <div key={e.id} style={baseStyles.card}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 12 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 10, gap: 8 }}>
                 <div>
-                  <h3 style={{ fontSize: 16, fontWeight: 700, color: colors.white, margin: 0 }}>{e.title}</h3>
+                  <h3 style={{ fontSize: 15, fontWeight: 700, color: colors.white, margin: "0 0 4px" }}>{e.title}</h3>
                   <span style={{ fontSize: 12, color: colors.textMuted }}>📊 {e.total_votes} votes · 👥 {e.total_voters} registered</span>
                 </div>
                 <StatusBadge status={e.status} />
@@ -977,14 +961,14 @@ const AdminPanel = ({ setView, setSelectedElection }) => {
                   <button onClick={() => transitionPhase(e.id, "publish_results")} style={{ ...baseStyles.btn, ...baseStyles.btnPrimary, fontSize: 12 }}>📊 Publish Results</button>
                 )}
                 <button onClick={() => { setSelectedElection(e); setView("election-detail"); }}
-                  style={{ ...baseStyles.btn, ...baseStyles.btnOutline, fontSize: 12 }}>View Details →</button>
+                  style={{ ...baseStyles.btn, ...baseStyles.btnOutline, fontSize: 12 }}>View →</button>
               </div>
               {e.candidates?.length > 0 && (
-                <div style={{ marginTop: 12, padding: "12px 0 0", borderTop: `1px solid ${colors.border}22` }}>
-                  <div style={{ fontSize: 12, color: colors.textMuted, marginBottom: 8 }}>Candidates:</div>
-                  <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                <div style={{ marginTop: 10, paddingTop: 10, borderTop: `1px solid ${colors.border}22` }}>
+                  <div style={{ fontSize: 11, color: colors.textMuted, marginBottom: 6 }}>Candidates:</div>
+                  <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
                     {e.candidates.map(c => (
-                      <span key={c.id} style={{ ...baseStyles.badge(colors.accent), fontSize: 12 }}>#{c.ballot_number} {c.full_name}</span>
+                      <span key={c.id} style={{ ...baseStyles.badge(colors.accent), fontSize: 11 }}>#{c.ballot_number} {c.full_name}</span>
                     ))}
                   </div>
                 </div>
@@ -997,34 +981,57 @@ const AdminPanel = ({ setView, setSelectedElection }) => {
       {activeTab === "users" && (
         <div style={baseStyles.card}>
           <div style={baseStyles.cardHeader}><span>👥</span> Registered Users</div>
-          <table style={{ width: "100%", borderCollapse: "collapse" }}>
-            <thead>
-              <tr style={{ borderBottom: `1px solid ${colors.border}` }}>
-                {["Student ID", "Name", "Email", "Role", "Faculty", "Eligible", ""].map(h => (
-                  <th key={h} style={{ padding: "10px 12px", textAlign: "left", fontSize: 11, color: colors.textMuted, textTransform: "uppercase" }}>{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {(Array.isArray(users) ? users : []).map(u => (
-                <tr key={u.id} style={{ borderBottom: `1px solid ${colors.border}22` }}>
-                  <td style={{ padding: "10px 12px", fontFamily: "monospace", fontSize: 13, color: colors.text }}>{u.student_id}</td>
-                  <td style={{ padding: "10px 12px", color: colors.white, fontWeight: 500 }}>{u.full_name}</td>
-                  <td style={{ padding: "10px 12px", color: colors.textDim, fontSize: 13 }}>{u.email}</td>
-                  <td style={{ padding: "10px 12px" }}><span style={baseStyles.badge(u.role === "admin" ? colors.purple : u.role === "sysadmin" ? colors.danger : colors.accent)}>{u.role}</span></td>
-                  <td style={{ padding: "10px 12px", color: colors.textDim, fontSize: 13 }}>{u.faculty}</td>
-                  <td style={{ padding: "10px 12px" }}><span style={{ color: u.is_eligible ? colors.accent : colors.textMuted }}>{u.is_eligible ? "✅" : "—"}</span></td>
-                  <td style={{ padding: "10px 12px" }}>
-                    {u.role === "voter" && !u.is_eligible && (
-                      <button onClick={() => markEligible(u.student_id)} style={{ ...baseStyles.btn, ...baseStyles.btnPrimary, fontSize: 11, padding: "6px 10px" }}>
-                        Mark Eligible
-                      </button>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          {isMobile ? (
+            (Array.isArray(users) ? users : []).map(u => (
+              <div key={u.id} style={{ background: colors.cardAlt, borderRadius: 10, padding: 12, marginBottom: 10 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
+                  <span style={{ fontWeight: 600, color: colors.white, fontSize: 14 }}>{u.full_name}</span>
+                  <span style={baseStyles.badge(u.role === "admin" ? colors.purple : u.role === "sysadmin" ? colors.danger : colors.accent)}>{u.role}</span>
+                </div>
+                <div style={{ fontSize: 12, color: colors.textMuted, fontFamily: "monospace" }}>{u.student_id}</div>
+                <div style={{ fontSize: 12, color: colors.textDim }}>{u.email}</div>
+                <div style={{ fontSize: 12, color: colors.textMuted }}>{u.faculty} · {u.is_eligible ? "✅ Eligible" : "—"}</div>
+                {!u.is_eligible && u.role === "voter" && (
+                  <button onClick={() => markEligible(u.student_id)}
+                    style={{ ...baseStyles.btn, ...baseStyles.btnPrimary, fontSize: 12, marginTop: 8, width: "100%", justifyContent: "center" }}>
+                    ✅ Mark Eligible
+                  </button>
+                )}
+              </div>
+            ))
+          ) : (
+            <div style={{ overflowX: "auto" }}>
+              <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 500 }}>
+                <thead>
+                  <tr style={{ borderBottom: `1px solid ${colors.border}` }}>
+                    {["Student ID", "Name", "Email", "Role", "Faculty", "Eligible", "Actions"].map(h => (
+                      <th key={h} style={{ padding: "10px 12px", textAlign: "left", fontSize: 11, color: colors.textMuted, textTransform: "uppercase" }}>{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {(Array.isArray(users) ? users : []).map(u => (
+                    <tr key={u.id} style={{ borderBottom: `1px solid ${colors.border}22` }}>
+                      <td style={{ padding: "10px 12px", fontFamily: "monospace", fontSize: 12, color: colors.text }}>{u.student_id}</td>
+                      <td style={{ padding: "10px 12px", color: colors.white, fontWeight: 500 }}>{u.full_name}</td>
+                      <td style={{ padding: "10px 12px", color: colors.textDim, fontSize: 13 }}>{u.email}</td>
+                      <td style={{ padding: "10px 12px" }}><span style={baseStyles.badge(u.role === "admin" ? colors.purple : u.role === "sysadmin" ? colors.danger : colors.accent)}>{u.role}</span></td>
+                      <td style={{ padding: "10px 12px", color: colors.textDim, fontSize: 13 }}>{u.faculty}</td>
+                      <td style={{ padding: "10px 12px" }}><span style={{ color: u.is_eligible ? colors.accent : colors.textMuted }}>{u.is_eligible ? "✅" : "—"}</span></td>
+                      <td style={{ padding: "10px 12px" }}>
+                        {!u.is_eligible && u.role === "voter" && (
+                          <button onClick={() => markEligible(u.student_id)}
+                            style={{ ...baseStyles.btn, ...baseStyles.btnPrimary, fontSize: 11, padding: "6px 10px" }}>
+                            Mark Eligible
+                          </button>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
       )}
 
@@ -1033,15 +1040,17 @@ const AdminPanel = ({ setView, setSelectedElection }) => {
           <div style={baseStyles.cardHeader}><span>📋</span> Audit Trail</div>
           <div style={{ maxHeight: 500, overflowY: "auto" }}>
             {(Array.isArray(auditLogs) ? auditLogs : []).map(log => (
-              <div key={log.id} style={{ padding: "12px 0", borderBottom: `1px solid ${colors.border}22`, display: "flex", gap: 16, alignItems: "flex-start" }}>
-                <div style={{ minWidth: 140 }}>
-                  <div style={{ fontSize: 12, color: colors.textMuted }}>{new Date(log.created_at).toLocaleString()}</div>
-                  <div style={{ fontSize: 11, color: colors.textMuted }}>{log.ip_address}</div>
-                </div>
-                <div>
-                  <span style={baseStyles.badge(colors.accent)}>{log.action}</span>
-                  <div style={{ fontSize: 13, color: colors.textDim, marginTop: 4 }}>{log.details}</div>
-                  <div style={{ fontSize: 11, color: colors.textMuted }}>{log.actor_name}</div>
+              <div key={log.id} style={{ padding: "12px 0", borderBottom: `1px solid ${colors.border}22` }}>
+                <div style={{ display: "flex", gap: 8, alignItems: "flex-start", flexWrap: isMobile ? "wrap" : "nowrap" }}>
+                  <div style={{ minWidth: isMobile ? "100%" : 140, marginBottom: isMobile ? 4 : 0 }}>
+                    <div style={{ fontSize: 11, color: colors.textMuted }}>{new Date(log.created_at).toLocaleString()}</div>
+                    <div style={{ fontSize: 10, color: colors.textMuted }}>{log.ip_address}</div>
+                  </div>
+                  <div>
+                    <span style={baseStyles.badge(colors.accent)}>{log.action}</span>
+                    <div style={{ fontSize: 13, color: colors.textDim, marginTop: 4 }}>{log.details}</div>
+                    <div style={{ fontSize: 11, color: colors.textMuted }}>{log.actor_name}</div>
+                  </div>
                 </div>
               </div>
             ))}
@@ -1056,54 +1065,56 @@ const AdminPanel = ({ setView, setSelectedElection }) => {
 // SYSTEM ADMIN
 // ═══════════════════════════════════════════════════════════════
 const SystemPanel = () => {
+  const isMobile = useIsMobile();
   const [health, setHealth] = useState(null);
+  const container = { maxWidth: 1200, margin: "0 auto", padding: isMobile ? "16px 12px" : "24px 24px" };
 
   useEffect(() => {
     api.get("/accounts/system-health/").then(setHealth).catch(() => setHealth({ error: true }));
   }, []);
 
   return (
-    <div style={baseStyles.container}>
-      <h1 style={{ fontSize: 26, fontWeight: 800, color: colors.white, margin: "0 0 24px" }}>System Administration</h1>
-      <div style={baseStyles.grid(3)}>
+    <div style={container}>
+      <h1 style={{ fontSize: isMobile ? 20 : 24, fontWeight: 800, color: colors.white, margin: "0 0 20px" }}>System Administration</h1>
+      <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "repeat(3, 1fr)", gap: 12, marginBottom: 16 }}>
         <div style={baseStyles.card}>
           <div style={baseStyles.cardHeader}><span>🗄️</span> Database</div>
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <span style={{ width: 12, height: 12, borderRadius: "50%", background: health?.database === "connected" ? colors.accent : colors.danger }} />
-            <span style={{ color: colors.text }}>{health?.database || "checking..."}</span>
+            <span style={{ width: 10, height: 10, borderRadius: "50%", background: health?.database === "connected" ? colors.accent : colors.danger, flexShrink: 0 }} />
+            <span style={{ color: colors.text, fontSize: 13 }}>{health?.database || "checking..."}</span>
           </div>
         </div>
         <div style={baseStyles.card}>
           <div style={baseStyles.cardHeader}><span>🔗</span> Blockchain</div>
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <span style={{ width: 12, height: 12, borderRadius: "50%", background: colors.warning }} />
-            <span style={{ color: colors.text }}>Ganache (Local Dev)</span>
+            <span style={{ width: 10, height: 10, borderRadius: "50%", background: colors.warning, flexShrink: 0 }} />
+            <span style={{ color: colors.text, fontSize: 13 }}>Ganache (Local Dev)</span>
           </div>
-          <p style={{ fontSize: 12, color: colors.textMuted, marginTop: 8 }}>Connect Ganache on port 8545 for full blockchain features</p>
+          <p style={{ fontSize: 12, color: colors.textMuted, marginTop: 8, marginBottom: 0 }}>Connect Ganache on port 8545 for full blockchain features</p>
         </div>
         <div style={baseStyles.card}>
           <div style={baseStyles.cardHeader}><span>⚡</span> System Status</div>
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <span style={{ width: 12, height: 12, borderRadius: "50%", background: health?.status === "operational" ? colors.accent : colors.danger }} />
-            <span style={{ color: colors.text }}>{health?.status || "checking..."}</span>
+            <span style={{ width: 10, height: 10, borderRadius: "50%", background: health?.status === "operational" ? colors.accent : colors.danger, flexShrink: 0 }} />
+            <span style={{ color: colors.text, fontSize: 13 }}>{health?.status || "checking..."}</span>
           </div>
         </div>
       </div>
 
       <div style={baseStyles.card}>
         <div style={baseStyles.cardHeader}><span>📖</span> System Information</div>
-        <div style={{ display: "grid", gap: 12 }}>
+        <div style={{ display: "grid", gap: 8 }}>
           {[
             ["Backend Framework", "Django 5.x (Python)"],
             ["Frontend Framework", "React.js"],
-            ["Database", "SQLite (dev) / PostgreSQL (prod)"],
-            ["Blockchain Platform", "Ethereum (Ganache local / Sepolia testnet)"],
+            ["Database", "PostgreSQL (Supabase)"],
+            ["Blockchain Platform", "Ethereum (Ganache local)"],
             ["Smart Contract Language", "Solidity ^0.8.19"],
             ["Authentication", "JWT (JSON Web Tokens)"],
             ["API Architecture", "REST API (Django REST Framework)"],
-            ["Blockchain Library", "Web3.py (backend) / Web3.js (frontend)"],
+            ["Blockchain Library", "Web3.py"],
           ].map(([k, v]) => (
-            <div key={k} style={{ display: "flex", justifyContent: "space-between", padding: "8px 12px", background: colors.cardAlt, borderRadius: 8 }}>
+            <div key={k} style={{ display: "flex", justifyContent: "space-between", padding: "8px 12px", background: colors.cardAlt, borderRadius: 8, flexWrap: isMobile ? "wrap" : "nowrap", gap: 4 }}>
               <span style={{ color: colors.textMuted, fontSize: 13 }}>{k}</span>
               <span style={{ color: colors.text, fontSize: 13, fontWeight: 500 }}>{v}</span>
             </div>

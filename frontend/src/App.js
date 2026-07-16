@@ -71,8 +71,18 @@ function AuthProvider({ children }) {
 
   const logout = () => { api.setToken(null); setUser(null); };
 
+  const refreshUser = async () => {
+    try {
+      const fresh = await api.get("/accounts/profile/");
+      setUser(fresh);
+      return fresh;
+    } catch (err) {
+      console.error("Failed to refresh user profile:", err);
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ user, login, register, logout, loading }}>
+    <AuthContext.Provider value={{ user, login, register, logout, loading, refreshUser }}>
       {children}
     </AuthContext.Provider>
   );
@@ -360,7 +370,7 @@ const LoginPage = () => {
 // DASHBOARD
 // ═══════════════════════════════════════════════════════════════
 const Dashboard = ({ setView, setSelectedElection }) => {
-  const { user } = useAuth();
+  const { user, refreshUser } = useAuth();
   const isMobile = useIsMobile();
   const [stats, setStats] = useState(null);
   const [elections, setElections] = useState([]);
@@ -375,6 +385,7 @@ const Dashboard = ({ setView, setSelectedElection }) => {
       finally { setLoading(false); }
     };
     load();
+    refreshUser();
   }, []);
 
   if (loading) return <LoadingSpinner />;
@@ -474,7 +485,7 @@ const Dashboard = ({ setView, setSelectedElection }) => {
 // ELECTION DETAIL / VOTING
 // ═══════════════════════════════════════════════════════════════
 const ElectionDetail = ({ election: initialElection, setView }) => {
-  const { user } = useAuth();
+  const { user, refreshUser } = useAuth();
   const isMobile = useIsMobile();
   const [election, setElection] = useState(initialElection);
   const [myStatus, setMyStatus] = useState(null);
@@ -499,6 +510,10 @@ const ElectionDetail = ({ election: initialElection, setView }) => {
       }
     } catch (err) { console.error(err); }
   }, [election.id]);
+
+  // Always pull the latest eligibility status when viewing an election,
+  // so a voter marked eligible by an admin sees it without re-logging in
+  useEffect(() => { refreshUser(); }, []);
 
   useEffect(() => { load(); }, [load]);
 

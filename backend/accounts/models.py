@@ -35,7 +35,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     role = models.CharField(max_length=10, choices=ROLE_CHOICES, default='voter')
     faculty = models.CharField(max_length=255, blank=True, default='')
     department = models.CharField(max_length=255, blank=True, default='')
-    is_eligible = models.BooleanField(default=False)
+    is_eligible = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)

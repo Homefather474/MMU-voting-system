@@ -128,7 +128,7 @@ const colors = {
 const font = "'Segoe UI', system-ui, -apple-system, sans-serif";
 
 const baseStyles = {
-  page: { minHeight: "100vh", background: `linear-gradient(135deg, ${colors.bg} 0%, #0f172a 50%, #1a1a2e 100%)`, fontFamily: font, color: colors.text, padding: 0, margin: 0 },
+  page: { minHeight: "100vh", width: "100%", maxWidth: "100vw", overflowX: "hidden", background: `linear-gradient(135deg, ${colors.bg} 0%, #0f172a 50%, #1a1a2e 100%)`, fontFamily: font, color: colors.text, padding: 0, margin: 0, boxSizing: "border-box" },
   card: { background: colors.card, borderRadius: 16, border: `1px solid ${colors.border}`, padding: 20, marginBottom: 16, backdropFilter: "blur(10px)" },
   cardHeader: { fontSize: 16, fontWeight: 700, color: colors.white, marginBottom: 14, display: "flex", alignItems: "center", gap: 8 },
   btn: { padding: "10px 18px", borderRadius: 10, border: "none", fontWeight: 600, fontSize: 14, cursor: "pointer", transition: "all 0.2s", fontFamily: font, display: "inline-flex", alignItems: "center", gap: 6 },
@@ -484,7 +484,7 @@ const Dashboard = ({ setView, setSelectedElection }) => {
 // ═══════════════════════════════════════════════════════════════
 // ELECTION DETAIL / VOTING
 // ═══════════════════════════════════════════════════════════════
-const ElectionDetail = ({ election: initialElection, setView }) => {
+const ElectionDetail = ({ election: initialElection, setView, setSelectedElection }) => {
   const { user, refreshUser } = useAuth();
   const isMobile = useIsMobile();
   const [election, setElection] = useState(initialElection);
@@ -555,12 +555,21 @@ const ElectionDetail = ({ election: initialElection, setView }) => {
             { val: election.total_voters, label: "Registered", color: colors.gold },
             { val: election.total_votes, label: "Votes Cast", color: colors.purple },
             { val: `${election.total_voters > 0 ? Math.round(election.total_votes / election.total_voters * 100) : 0}%`, label: "Turnout", color: colors.warning },
-          ].map(({ val, label, color }) => (
-            <div key={label} style={{ textAlign: "center", padding: "10px 0" }}>
-              <div style={{ fontSize: 22, fontWeight: 800, color }}>{val}</div>
-              <div style={{ fontSize: 11, color: colors.textMuted, textTransform: "uppercase", letterSpacing: 1 }}>{label}</div>
-            </div>
-          ))}
+          ].map(({ val, label, color }) => {
+            const clickable = label === "Registered" && (user?.role === "admin" || user?.role === "sysadmin");
+            return (
+              <div key={label}
+                onClick={clickable ? () => { setSelectedElection?.(election); setView("voter-list"); } : undefined}
+                style={{ textAlign: "center", padding: "10px 0", cursor: clickable ? "pointer" : "default", borderRadius: 8, transition: "background 0.15s" }}
+                onMouseEnter={clickable ? (e) => e.currentTarget.style.background = `${colors.accent}0f` : undefined}
+                onMouseLeave={clickable ? (e) => e.currentTarget.style.background = "transparent" : undefined}>
+                <div style={{ fontSize: 22, fontWeight: 800, color }}>{val}</div>
+                <div style={{ fontSize: 11, color: colors.textMuted, textTransform: "uppercase", letterSpacing: 1 }}>
+                  {label}{clickable ? " →" : ""}
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
 
@@ -765,6 +774,94 @@ const ElectionsList = ({ setView, setSelectedElection }) => {
 // ═══════════════════════════════════════════════════════════════
 // VERIFY VOTE
 // ═══════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════
+// REGISTERED VOTERS LIST (admin drill-down from an election)
+// ═══════════════════════════════════════════════════════════════
+const RegisteredVotersList = ({ election, setView }) => {
+  const isMobile = useIsMobile();
+  const [regs, setRegs] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
+  const [error, setError] = useState("");
+  const container = { maxWidth: 1200, margin: "0 auto", padding: isMobile ? "16px 12px" : "24px 24px" };
+
+  useEffect(() => {
+    if (!election) return;
+    api.get(`/voting/elections/${election.id}/registrations/`)
+      .then(setRegs)
+      .catch((err) => setError(err.message))
+      .finally(() => setLoading(false));
+  }, [election]);
+
+  if (!election) return <LoadingSpinner />;
+
+  const filtered = regs.filter(r =>
+    r.user_name?.toLowerCase().includes(search.toLowerCase()) ||
+    r.student_id?.toLowerCase().includes(search.toLowerCase())
+  );
+
+  return (
+    <div style={container}>
+      <button onClick={() => setView("admin")} style={{ ...baseStyles.btn, ...baseStyles.btnOutline, marginBottom: 16, fontSize: 13 }}>← Back to Admin Panel</button>
+
+      <div style={{ marginBottom: 18 }}>
+        <h1 style={{ fontSize: isMobile ? 18 : 22, fontWeight: 800, color: colors.white, margin: 0 }}>Registered Voters</h1>
+        <p style={{ color: colors.textMuted, margin: "4px 0 0", fontSize: 13 }}>{election.title}</p>
+      </div>
+
+      {loading ? <LoadingSpinner /> : error ? <Alert type="error">{error}</Alert> : (
+        <div style={baseStyles.card}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14, flexWrap: "wrap", gap: 10 }}>
+            <div style={baseStyles.cardHeader}><span>👥</span> {regs.length} Registered</div>
+            <input
+              placeholder="Search by name or student ID..."
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              style={{ ...baseStyles.input, maxWidth: isMobile ? "100%" : 280 }}
+            />
+          </div>
+
+          {filtered.length === 0 ? (
+            <p style={{ color: colors.textMuted, textAlign: "center", padding: 24 }}>
+              {regs.length === 0 ? "No voters have registered for this election yet." : "No matches found."}
+            </p>
+          ) : isMobile ? (
+            filtered.map((r, i) => (
+              <div key={r.id || i} style={{ background: colors.cardAlt, borderRadius: 10, padding: 12, marginBottom: 10, border: `1px solid ${colors.border}` }}>
+                <div style={{ fontWeight: 600, color: colors.white, fontSize: 14 }}>{r.user_name}</div>
+                <div style={{ fontSize: 12, color: colors.textMuted, fontFamily: "monospace" }}>{r.student_id}</div>
+                <div style={{ fontSize: 11, color: colors.textMuted, marginTop: 4 }}>Registered {new Date(r.registered_at).toLocaleString()}</div>
+              </div>
+            ))
+          ) : (
+            <div style={{ overflowX: "auto" }}>
+              <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 500 }}>
+                <thead>
+                  <tr style={{ borderBottom: `1px solid ${colors.border}` }}>
+                    {["#", "Student ID", "Name", "Registered At"].map(h => (
+                      <th key={h} style={{ padding: "10px 12px", textAlign: "left", fontSize: 11, color: colors.textMuted, textTransform: "uppercase" }}>{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {filtered.map((r, i) => (
+                    <tr key={r.id || i} style={{ borderBottom: `1px solid ${colors.border}22` }}>
+                      <td style={{ padding: "10px 12px", color: colors.textMuted, fontSize: 12 }}>{i + 1}</td>
+                      <td style={{ padding: "10px 12px", fontFamily: "monospace", fontSize: 12, color: colors.text }}>{r.student_id}</td>
+                      <td style={{ padding: "10px 12px", color: colors.white, fontWeight: 500 }}>{r.user_name}</td>
+                      <td style={{ padding: "10px 12px", color: colors.textDim, fontSize: 13 }}>{new Date(r.registered_at).toLocaleString()}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+};
+
 const VerifyVote = () => {
   const isMobile = useIsMobile();
   const [hash, setHash] = useState("");
@@ -995,7 +1092,15 @@ const AdminPanel = ({ setView, setSelectedElection }) => {
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 10, gap: 8 }}>
                 <div>
                   <h3 style={{ fontSize: 15, fontWeight: 700, color: colors.white, margin: "0 0 4px" }}>{e.title}</h3>
-                  <span style={{ fontSize: 12, color: colors.textMuted }}>📊 {e.total_votes} votes · 👥 {e.total_voters} registered</span>
+                  <span style={{ fontSize: 12, color: colors.textMuted }}>
+                    📊 {e.total_votes} votes ·{" "}
+                    <span
+                      onClick={() => { setSelectedElection(e); setView("voter-list"); }}
+                      style={{ color: colors.accent, textDecoration: "underline", cursor: "pointer", fontWeight: 600 }}
+                    >
+                      👥 {e.total_voters} registered
+                    </span>
+                  </span>
                 </div>
                 <StatusBadge status={e.status} />
               </div>
@@ -1272,7 +1377,8 @@ const AppContent = () => {
     switch (view) {
       case "dashboard": return <Dashboard setView={setView} setSelectedElection={setSelectedElection} />;
       case "elections": return <ElectionsList setView={setView} setSelectedElection={setSelectedElection} />;
-      case "election-detail": return selectedElection ? <ElectionDetail election={selectedElection} setView={setView} /> : <ElectionsList setView={setView} setSelectedElection={setSelectedElection} />;
+      case "election-detail": return selectedElection ? <ElectionDetail election={selectedElection} setView={setView} setSelectedElection={setSelectedElection} /> : <ElectionsList setView={setView} setSelectedElection={setSelectedElection} />;
+      case "voter-list": return <RegisteredVotersList election={selectedElection} setView={setView} />;
       case "verify": return <VerifyVote />;
       case "admin": return <AdminPanel setView={setView} setSelectedElection={setSelectedElection} />;
       case "system": return <SystemPanel />;
@@ -1291,6 +1397,10 @@ const AppContent = () => {
 export default function App() {
   return (
     <AuthProvider>
+      <style>{`
+        html, body { overflow-x: hidden; max-width: 100vw; margin: 0; padding: 0; }
+        * { box-sizing: border-box; }
+      `}</style>
       <AppContent />
     </AuthProvider>
   );

@@ -40,6 +40,7 @@ class Candidate(models.Model):
     manifesto_summary = models.TextField(blank=True, default='')
     ballot_number = models.IntegerField()
     photo_url = models.URLField(blank=True, default='')
+    vote_count = models.PositiveIntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

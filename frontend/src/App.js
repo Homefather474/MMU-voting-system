@@ -175,6 +175,59 @@ const Alert = ({ type = "info", children }) => {
   );
 };
 
+// ═══════════════════════════════════════════════════════════════
+// FIREWORKS CELEBRATION OVERLAY
+// ═══════════════════════════════════════════════════════════════
+const Fireworks = ({ onDone }) => {
+  useEffect(() => {
+    const t = setTimeout(onDone, 2600);
+    return () => clearTimeout(t);
+  }, [onDone]);
+
+  const palette = [colors.accent, colors.gold, "#ffffff", colors.accentBright, "#ff8fa3"];
+  const bursts = Array.from({ length: 6 }, (_, i) => ({
+    id: i,
+    left: 10 + Math.random() * 80,
+    top: 10 + Math.random() * 45,
+    delay: Math.random() * 0.9,
+    color: palette[i % palette.length],
+  }));
+
+  return (
+    <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, zIndex: 500, pointerEvents: "none", overflow: "hidden" }}>
+      <style>{`
+        @keyframes fw-burst {
+          0% { transform: scale(0); opacity: 1; }
+          70% { opacity: 1; }
+          100% { transform: scale(1); opacity: 0; }
+        }
+        @keyframes fw-particle {
+          0% { transform: translate(0,0) scale(1); opacity: 1; }
+          100% { transform: translate(var(--dx), var(--dy)) scale(0.2); opacity: 0; }
+        }
+      `}</style>
+      {bursts.map((b) => (
+        <div key={b.id} style={{ position: "absolute", left: `${b.left}%`, top: `${b.top}%`, width: 0, height: 0 }}>
+          {Array.from({ length: 14 }).map((_, j) => {
+            const angle = (j / 14) * 2 * Math.PI;
+            const dist = 60 + Math.random() * 50;
+            const dx = Math.cos(angle) * dist;
+            const dy = Math.sin(angle) * dist;
+            return (
+              <div key={j} style={{
+                position: "absolute", width: 7, height: 7, borderRadius: "50%",
+                background: b.color, boxShadow: `0 0 8px 2px ${b.color}`,
+                animation: `fw-particle 1.1s ease-out ${b.delay}s forwards`,
+                "--dx": `${dx}px`, "--dy": `${dy}px`,
+              }} />
+            );
+          })}
+        </div>
+      ))}
+    </div>
+  );
+};
+
 const StatCard = ({ icon, value, label }) => (
   <div style={{ ...baseStyles.card, ...baseStyles.stat, marginBottom: 0 }}>
     <div style={{ fontSize: 24, marginBottom: 6 }}>{icon}</div>
@@ -495,6 +548,7 @@ const ElectionDetail = ({ election: initialElection, setView, setSelectedElectio
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [results, setResults] = useState(null);
+  const [showFireworks, setShowFireworks] = useState(false);
 
   const container = { maxWidth: 1200, margin: "0 auto", padding: isMobile ? "16px 12px" : "24px 24px" };
 
@@ -711,7 +765,35 @@ const ElectionDetail = ({ election: initialElection, setView, setSelectedElectio
           <div style={{ fontSize: 12, color: colors.textMuted, marginBottom: 14 }}>
             {results.source === "blockchain" ? "🔗 Blockchain Verified" : "🗄️ Database"}
           </div>
-          {results.results.sort((a, b) => b.vote_count - a.vote_count).map((r, i) => (
+
+          {results.winner && !results.winner.tie && (
+            <div
+              onClick={() => setShowFireworks(true)}
+              style={{
+                cursor: "pointer", textAlign: "center", padding: "20px 16px", marginBottom: 20,
+                borderRadius: 14, border: `2px solid ${colors.gold}`,
+                background: `linear-gradient(135deg, ${colors.gold}22, ${colors.accent}15)`,
+                position: "relative", overflow: "hidden",
+              }}
+              title="Tap to celebrate!"
+            >
+              <div style={{ fontSize: 34, marginBottom: 6 }}>🏆</div>
+              <div style={{ fontSize: 11, color: colors.gold, textTransform: "uppercase", letterSpacing: 2, fontWeight: 700, marginBottom: 4 }}>Winner</div>
+              <div style={{ fontSize: isMobile ? 20 : 24, fontWeight: 800, color: colors.white }}>{results.winner.name}</div>
+              <div style={{ fontSize: 13, color: colors.textDim, marginTop: 4 }}>
+                {results.winner.vote_count} votes · {totalVotesResult > 0 ? Math.round(results.winner.vote_count / totalVotesResult * 100) : 0}% of ballots cast
+              </div>
+              <div style={{ fontSize: 11, color: colors.textMuted, marginTop: 10, fontStyle: "italic" }}>🎉 Tap to celebrate</div>
+            </div>
+          )}
+
+          {results.winner?.tie && (
+            <Alert type="warning">
+              🤝 It's a tie between {results.winner.candidates.map(c => c.name).join(" and ")}, each with {results.winner.candidates[0].vote_count} votes.
+            </Alert>
+          )}
+
+          {results.results.slice().sort((a, b) => b.vote_count - a.vote_count).map((r, i) => (
             <div key={r.candidate_id} style={{ marginBottom: 14 }}>
               <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6, flexWrap: "wrap", gap: 4 }}>
                 <span style={{ fontWeight: 600, color: i === 0 ? colors.accent : colors.text, fontSize: 14 }}>
@@ -728,6 +810,8 @@ const ElectionDetail = ({ election: initialElection, setView, setSelectedElectio
           ))}
         </div>
       )}
+
+      {showFireworks && <Fireworks onDone={() => setShowFireworks(false)} />}
     </div>
   );
 };

@@ -290,6 +290,13 @@ class CastVoteView(APIView):
             block_number=block_number
         )
 
+        # Increment the aggregate tally only — this counter reveals nothing about
+        # who cast the vote, mirroring the same guarantee provided by the smart
+        # contract's on-chain voteCount, and ensures results are available even
+        # when no blockchain node is connected in production.
+        from django.db.models import F
+        Candidate.objects.filter(pk=candidate.pk).update(vote_count=F('vote_count') + 1)
+
         log_action(request.user, 'VOTE_CAST',
                    f'Vote cast in {election.title}', request)
 
@@ -345,30 +352,64 @@ class ElectionResultsView(APIView):
         if election.status not in ['ended', 'results_published']:
             return Response({'error': 'Results not available yet'}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Try blockchain results first
+        total_registered = election.registrations.count()
+        source = 'database'
+        results = []
+
+        # Prefer blockchain results when a live node is connected
         if election.contract_address and blockchain_service.is_connected:
             try:
                 blockchain_results = blockchain_service.get_results(election.contract_address)
-                return Response({
-                    'election': ElectionSerializer(election).data,
-                    'results': blockchain_results,
-                    'source': 'blockchain',
-                    'total_votes': sum(r['vote_count'] for r in blockchain_results),
-                })
+                results = [
+                    {
+                        'candidate_id': r.get('candidate_id'),
+                        'name': r.get('name'),
+                        'position': r.get('position', ''),
+                        'vote_count': r.get('vote_count', 0),
+                    }
+                    for r in blockchain_results
+                ]
+                source = 'blockchain'
             except Exception:
-                pass
+                results = []
 
-        # Fallback: count from database (less authoritative)
-        total_votes = election.vote_records.count()
-        total_registered = election.registrations.count()
+        # Fallback / always-available path: aggregate tallies stored on Candidate.
+        # This never reveals individual voter choices — only the running total,
+        # the same privacy guarantee as the smart contract's on-chain counter.
+        if not results:
+            candidates = election.candidates.all().order_by('-vote_count', 'ballot_number')
+            results = [
+                {
+                    'candidate_id': str(c.id),
+                    'name': c.full_name,
+                    'position': c.position,
+                    'ballot_number': c.ballot_number,
+                    'vote_count': c.vote_count,
+                }
+                for c in candidates
+            ]
+            source = 'database'
+
+        results.sort(key=lambda r: r['vote_count'], reverse=True)
+        total_votes = sum(r['vote_count'] for r in results)
+
+        winner = None
+        if results and total_votes > 0:
+            top_count = results[0]['vote_count']
+            tied_leaders = [r for r in results if r['vote_count'] == top_count]
+            if len(tied_leaders) == 1:
+                winner = tied_leaders[0]
+            else:
+                winner = {'tie': True, 'candidates': tied_leaders}
 
         return Response({
             'election': ElectionSerializer(election).data,
+            'results': results,
+            'winner': winner,
             'total_votes': total_votes,
             'total_registered': total_registered,
             'turnout_percentage': round((total_votes / total_registered * 100), 1) if total_registered > 0 else 0,
-            'source': 'database',
-            'note': 'Blockchain unavailable - showing database records only'
+            'source': source,
         })
 
 

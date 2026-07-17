@@ -843,6 +843,9 @@ const AdminPanel = ({ setView, setSelectedElection }) => {
   const [activeTab, setActiveTab] = useState("elections");
   const [auditLogs, setAuditLogs] = useState([]);
   const [users, setUsers] = useState([]);
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [editForm, setEditForm] = useState(null);
+  const [userActionLoading, setUserActionLoading] = useState(false);
   const container = { maxWidth: 1200, margin: "0 auto", padding: isMobile ? "16px 12px" : "24px 24px" };
 
   const loadData = async () => {
@@ -888,12 +891,52 @@ const AdminPanel = ({ setView, setSelectedElection }) => {
     } catch (err) { setMsg("Error: " + err.message); }
   };
 
-  const markEligible = async (studentId) => {
+  const openUser = (u) => {
+    setSelectedUser(u);
+    setEditForm({ full_name: u.full_name, email: u.email, faculty: u.faculty || "", department: u.department || "" });
+  };
+
+  const closeUserModal = () => { setSelectedUser(null); setEditForm(null); };
+
+  const saveUserEdits = async () => {
+    if (!selectedUser) return;
+    setUserActionLoading(true);
     try {
-      await api.post("/accounts/bulk-eligibility/", { student_ids: [studentId], is_eligible: true });
-      setMsg("Voter marked eligible!");
+      await api.patch(`/accounts/users/${selectedUser.id}/`, editForm);
+      setMsg("User details updated!");
+      closeUserModal();
       await loadData();
     } catch (err) { setMsg("Error: " + err.message); }
+    finally { setUserActionLoading(false); }
+  };
+
+  const toggleEligibility = async (u) => {
+    setUserActionLoading(true);
+    try {
+      await api.patch(`/accounts/users/${u.id}/`, { is_eligible: !u.is_eligible });
+      setMsg(u.is_eligible ? "Voter eligibility revoked." : "Voter marked eligible!");
+      if (selectedUser?.id === u.id) setSelectedUser({ ...u, is_eligible: !u.is_eligible });
+      await loadData();
+    } catch (err) { setMsg("Error: " + err.message); }
+    finally { setUserActionLoading(false); }
+  };
+
+  const markEligible = (studentIdOrUser) => {
+    // Back-compat wrapper: accepts either a full user object or just a student_id
+    const u = typeof studentIdOrUser === "string" ? users.find(x => x.student_id === studentIdOrUser) : studentIdOrUser;
+    if (u) toggleEligibility(u);
+  };
+
+  const deleteUser = async (u) => {
+    if (!window.confirm(`Permanently delete ${u.full_name} (${u.student_id})? This cannot be undone.`)) return;
+    setUserActionLoading(true);
+    try {
+      await api.del(`/accounts/users/${u.id}/`);
+      setMsg(`${u.full_name} deleted.`);
+      closeUserModal();
+      await loadData();
+    } catch (err) { setMsg("Error: " + err.message); }
+    finally { setUserActionLoading(false); }
   };
 
   if (loading) return <LoadingSpinner />;
@@ -996,27 +1039,35 @@ const AdminPanel = ({ setView, setSelectedElection }) => {
       {activeTab === "users" && (
         <div style={baseStyles.card}>
           <div style={baseStyles.cardHeader}><span>👥</span> Registered Users</div>
+          <p style={{ fontSize: 12, color: colors.textMuted, marginTop: -8, marginBottom: 14 }}>Click any user to view, edit, mark eligible, or delete.</p>
           {isMobile ? (
             (Array.isArray(users) ? users : []).map(u => (
-              <div key={u.id} style={{ background: colors.cardAlt, borderRadius: 10, padding: 12, marginBottom: 10 }}>
+              <div key={u.id} onClick={() => openUser(u)}
+                style={{ background: colors.cardAlt, borderRadius: 10, padding: 12, marginBottom: 10, cursor: "pointer", border: `1px solid ${colors.border}` }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
                   <span style={{ fontWeight: 600, color: colors.white, fontSize: 14 }}>{u.full_name}</span>
                   <span style={baseStyles.badge(u.role === "admin" ? colors.purple : u.role === "sysadmin" ? colors.danger : colors.accent)}>{u.role}</span>
                 </div>
                 <div style={{ fontSize: 12, color: colors.textMuted, fontFamily: "monospace" }}>{u.student_id}</div>
                 <div style={{ fontSize: 12, color: colors.textDim }}>{u.email}</div>
-                <div style={{ fontSize: 12, color: colors.textMuted }}>{u.faculty} · {u.is_eligible ? "✅ Eligible" : "—"}</div>
-                {!u.is_eligible && u.role === "voter" && (
-                  <button onClick={() => markEligible(u.student_id)}
-                    style={{ ...baseStyles.btn, ...baseStyles.btnPrimary, fontSize: 12, marginTop: 8, width: "100%", justifyContent: "center" }}>
-                    ✅ Mark Eligible
+                <div style={{ fontSize: 12, color: colors.textMuted, marginBottom: 8 }}>{u.faculty} · {u.is_eligible ? "✅ Eligible" : "—"}</div>
+                <div style={{ display: "flex", gap: 8 }}>
+                  {u.role === "voter" && (
+                    <button onClick={(e) => { e.stopPropagation(); toggleEligibility(u); }}
+                      style={{ ...baseStyles.btn, ...(u.is_eligible ? baseStyles.btnOutline : baseStyles.btnPrimary), fontSize: 11, flex: 1, justifyContent: "center", padding: "6px 8px" }}>
+                      {u.is_eligible ? "Revoke" : "✅ Mark Eligible"}
+                    </button>
+                  )}
+                  <button onClick={(e) => { e.stopPropagation(); openUser(u); }}
+                    style={{ ...baseStyles.btn, ...baseStyles.btnOutline, fontSize: 11, padding: "6px 8px" }}>
+                    ⚙️
                   </button>
-                )}
+                </div>
               </div>
             ))
           ) : (
             <div style={{ overflowX: "auto" }}>
-              <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 500 }}>
+              <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 600 }}>
                 <thead>
                   <tr style={{ borderBottom: `1px solid ${colors.border}` }}>
                     {["Student ID", "Name", "Email", "Role", "Faculty", "Eligible", "Actions"].map(h => (
@@ -1026,7 +1077,10 @@ const AdminPanel = ({ setView, setSelectedElection }) => {
                 </thead>
                 <tbody>
                   {(Array.isArray(users) ? users : []).map(u => (
-                    <tr key={u.id} style={{ borderBottom: `1px solid ${colors.border}22` }}>
+                    <tr key={u.id} onClick={() => openUser(u)}
+                      style={{ borderBottom: `1px solid ${colors.border}22`, cursor: "pointer" }}
+                      onMouseEnter={(e) => e.currentTarget.style.background = `${colors.accent}0a`}
+                      onMouseLeave={(e) => e.currentTarget.style.background = "transparent"}>
                       <td style={{ padding: "10px 12px", fontFamily: "monospace", fontSize: 12, color: colors.text }}>{u.student_id}</td>
                       <td style={{ padding: "10px 12px", color: colors.white, fontWeight: 500 }}>{u.full_name}</td>
                       <td style={{ padding: "10px 12px", color: colors.textDim, fontSize: 13 }}>{u.email}</td>
@@ -1034,12 +1088,18 @@ const AdminPanel = ({ setView, setSelectedElection }) => {
                       <td style={{ padding: "10px 12px", color: colors.textDim, fontSize: 13 }}>{u.faculty}</td>
                       <td style={{ padding: "10px 12px" }}><span style={{ color: u.is_eligible ? colors.accent : colors.textMuted }}>{u.is_eligible ? "✅" : "—"}</span></td>
                       <td style={{ padding: "10px 12px" }}>
-                        {!u.is_eligible && u.role === "voter" && (
-                          <button onClick={() => markEligible(u.student_id)}
-                            style={{ ...baseStyles.btn, ...baseStyles.btnPrimary, fontSize: 11, padding: "6px 10px" }}>
-                            Mark Eligible
+                        <div style={{ display: "flex", gap: 6 }}>
+                          {u.role === "voter" && (
+                            <button onClick={(e) => { e.stopPropagation(); toggleEligibility(u); }}
+                              style={{ ...baseStyles.btn, ...(u.is_eligible ? baseStyles.btnOutline : baseStyles.btnPrimary), fontSize: 11, padding: "6px 10px" }}>
+                              {u.is_eligible ? "Revoke" : "Mark Eligible"}
+                            </button>
+                          )}
+                          <button onClick={(e) => { e.stopPropagation(); openUser(u); }}
+                            style={{ ...baseStyles.btn, ...baseStyles.btnOutline, fontSize: 11, padding: "6px 10px" }}>
+                            Manage
                           </button>
-                        )}
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -1047,6 +1107,64 @@ const AdminPanel = ({ setView, setSelectedElection }) => {
               </table>
             </div>
           )}
+        </div>
+      )}
+
+      {/* User Detail / Edit Modal */}
+      {selectedUser && editForm && (
+        <div onClick={closeUserModal} style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(0,0,0,0.6)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 200, padding: 16 }}>
+          <div onClick={(e) => e.stopPropagation()} style={{ background: colors.card, borderRadius: 16, border: `1px solid ${colors.border}`, padding: 24, width: "100%", maxWidth: 460, maxHeight: "90vh", overflowY: "auto" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
+              <h3 style={{ color: colors.white, margin: 0, fontSize: 18 }}>Manage User</h3>
+              <button onClick={closeUserModal} style={{ background: "transparent", border: "none", color: colors.textMuted, fontSize: 20, cursor: "pointer" }}>✕</button>
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 18, flexWrap: "wrap" }}>
+              <span style={{ fontFamily: "monospace", fontSize: 12, color: colors.textMuted }}>{selectedUser.student_id}</span>
+              <span style={baseStyles.badge(selectedUser.role === "admin" ? colors.purple : selectedUser.role === "sysadmin" ? colors.danger : colors.accent)}>{selectedUser.role}</span>
+              <span style={baseStyles.badge(selectedUser.is_eligible ? colors.accent : colors.textMuted)}>{selectedUser.is_eligible ? "✅ Eligible" : "Not Eligible"}</span>
+            </div>
+
+            <div style={{ marginBottom: 12 }}>
+              <label style={baseStyles.label}>Full Name</label>
+              <input style={baseStyles.input} value={editForm.full_name} onChange={e => setEditForm(f => ({ ...f, full_name: e.target.value }))} />
+            </div>
+            <div style={{ marginBottom: 12 }}>
+              <label style={baseStyles.label}>Email</label>
+              <input style={baseStyles.input} type="email" value={editForm.email} onChange={e => setEditForm(f => ({ ...f, email: e.target.value }))} />
+            </div>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 18 }}>
+              <div>
+                <label style={baseStyles.label}>Faculty</label>
+                <input style={baseStyles.input} value={editForm.faculty} onChange={e => setEditForm(f => ({ ...f, faculty: e.target.value }))} />
+              </div>
+              <div>
+                <label style={baseStyles.label}>Department</label>
+                <input style={baseStyles.input} value={editForm.department} onChange={e => setEditForm(f => ({ ...f, department: e.target.value }))} />
+              </div>
+            </div>
+
+            <button onClick={saveUserEdits} disabled={userActionLoading}
+              style={{ ...baseStyles.btn, ...baseStyles.btnPrimary, width: "100%", justifyContent: "center", marginBottom: 10, opacity: userActionLoading ? 0.7 : 1 }}>
+              {userActionLoading ? "Saving..." : "💾 Save Changes"}
+            </button>
+
+            {selectedUser.role === "voter" && (
+              <button onClick={() => toggleEligibility(selectedUser)} disabled={userActionLoading}
+                style={{ ...baseStyles.btn, ...(selectedUser.is_eligible ? baseStyles.btnOutline : baseStyles.btnBlue), width: "100%", justifyContent: "center", marginBottom: 10, opacity: userActionLoading ? 0.7 : 1 }}>
+                {selectedUser.is_eligible ? "🚫 Revoke Eligibility" : "✅ Mark Eligible"}
+              </button>
+            )}
+
+            <div style={{ borderTop: `1px solid ${colors.border}`, marginTop: 8, paddingTop: 14 }}>
+              <button onClick={() => deleteUser(selectedUser)} disabled={userActionLoading}
+                style={{ ...baseStyles.btn, ...baseStyles.btnDanger, width: "100%", justifyContent: "center", opacity: userActionLoading ? 0.7 : 1 }}>
+                🗑️ Delete User Permanently
+              </button>
+              <p style={{ fontSize: 11, color: colors.textMuted, textAlign: "center", marginTop: 8, marginBottom: 0 }}>
+                This cannot be undone. Vote records are preserved and anonymised, not deleted.
+              </p>
+            </div>
+          </div>
         </div>
       )}
 

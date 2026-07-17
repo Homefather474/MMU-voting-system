@@ -3,6 +3,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.contrib.auth import authenticate
+from django.shortcuts import get_object_or_404
 from accounts.models import User, AuditLog
 from accounts.serializers import (
     UserSerializer, UserRegistrationSerializer, LoginSerializer, AuditLogSerializer
@@ -102,6 +103,58 @@ class BulkEligibilityView(APIView):
         log_action(request.user, 'BULK_ELIGIBILITY_UPDATE',
                    f'Updated {updated} voters as eligible', request)
         return Response({'updated': updated})
+
+
+class UserDetailView(APIView):
+    """Admin-only single-user management: view, edit, delete, and toggle eligibility."""
+
+    EDITABLE_FIELDS = ['full_name', 'email', 'faculty', 'department', 'is_eligible']
+
+    def get_user(self, pk):
+        return get_object_or_404(User, pk=pk)
+
+    def get(self, request, pk):
+        if request.user.role not in ['admin', 'sysadmin']:
+            return Response({'error': 'Permission denied'}, status=status.HTTP_403_FORBIDDEN)
+        target = self.get_user(pk)
+        return Response(UserSerializer(target).data)
+
+    def patch(self, request, pk):
+        if request.user.role not in ['admin', 'sysadmin']:
+            return Response({'error': 'Permission denied'}, status=status.HTTP_403_FORBIDDEN)
+
+        target = self.get_user(pk)
+
+        # Only a sysadmin may change roles, and never their own role via this endpoint
+        incoming = {k: v for k, v in request.data.items() if k in self.EDITABLE_FIELDS}
+        if 'role' in request.data and request.user.role == 'sysadmin' and target.id != request.user.id:
+            incoming['role'] = request.data['role']
+
+        for field, value in incoming.items():
+            setattr(target, field, value)
+        target.save()
+
+        log_action(request.user, 'USER_UPDATED',
+                   f'Updated user {target.student_id}: {list(incoming.keys())}', request)
+        return Response(UserSerializer(target).data)
+
+    def delete(self, request, pk):
+        if request.user.role not in ['admin', 'sysadmin']:
+            return Response({'error': 'Permission denied'}, status=status.HTTP_403_FORBIDDEN)
+
+        target = self.get_user(pk)
+
+        if target.id == request.user.id:
+            return Response({'error': 'You cannot delete your own account'}, status=status.HTTP_400_BAD_REQUEST)
+
+        if target.role in ['admin', 'sysadmin'] and request.user.role != 'sysadmin':
+            return Response({'error': 'Only a system administrator can delete admin accounts'}, status=status.HTTP_403_FORBIDDEN)
+
+        student_id = target.student_id
+        target.delete()
+
+        log_action(request.user, 'USER_DELETED', f'Deleted user {student_id}', request)
+        return Response({'message': f'User {student_id} deleted successfully'}, status=status.HTTP_200_OK)
 
 
 class AuditLogListView(generics.ListAPIView):

@@ -781,7 +781,7 @@ const ElectionDetail = ({ election: initialElection, setView, setSelectedElectio
               <div style={{ fontSize: 11, color: colors.gold, textTransform: "uppercase", letterSpacing: 2, fontWeight: 700, marginBottom: 4 }}>Winner</div>
               <div style={{ fontSize: isMobile ? 20 : 24, fontWeight: 800, color: colors.white }}>{results.winner.name}</div>
               <div style={{ fontSize: 13, color: colors.textDim, marginTop: 4 }}>
-                {results.winner.vote_count} votes · {totalVotesResult > 0 ? Math.round(results.winner.vote_count / totalVotesResult * 100) : 0}% of ballots cast
+                {results.winner.vote_count} votes · {results.winner.percentage ?? (totalVotesResult > 0 ? Math.round(results.winner.vote_count / totalVotesResult * 100) : 0)}% of ballots cast
               </div>
               <div style={{ fontSize: 11, color: colors.textMuted, marginTop: 10, fontStyle: "italic" }}>🎉 Tap to celebrate</div>
             </div>
@@ -793,21 +793,24 @@ const ElectionDetail = ({ election: initialElection, setView, setSelectedElectio
             </Alert>
           )}
 
-          {results.results.slice().sort((a, b) => b.vote_count - a.vote_count).map((r, i) => (
-            <div key={r.candidate_id} style={{ marginBottom: 14 }}>
-              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6, flexWrap: "wrap", gap: 4 }}>
-                <span style={{ fontWeight: 600, color: i === 0 ? colors.accent : colors.text, fontSize: 14 }}>
-                  {i === 0 && "🏆 "}{r.name}
-                </span>
-                <span style={{ fontWeight: 700, color: colors.white, fontSize: 13 }}>
-                  {r.vote_count} votes ({totalVotesResult > 0 ? Math.round(r.vote_count / totalVotesResult * 100) : 0}%)
-                </span>
+          {results.results.slice().sort((a, b) => b.vote_count - a.vote_count).map((r, i) => {
+            const pct = r.percentage ?? (totalVotesResult > 0 ? Math.round(r.vote_count / totalVotesResult * 100) : 0);
+            return (
+              <div key={r.candidate_id} style={{ marginBottom: 14 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6, flexWrap: "wrap", gap: 4 }}>
+                  <span style={{ fontWeight: 600, color: i === 0 ? colors.accent : colors.text, fontSize: 14 }}>
+                    {i === 0 && "🏆 "}{r.name}
+                  </span>
+                  <span style={{ fontWeight: 700, color: colors.white, fontSize: 13 }}>
+                    {r.vote_count} votes ({pct}%)
+                  </span>
+                </div>
+                <div style={{ height: 9, background: colors.cardAlt, borderRadius: 5, overflow: "hidden" }}>
+                  <div style={{ height: "100%", borderRadius: 5, background: i === 0 ? `linear-gradient(90deg, ${colors.warning}, #e8b82a)` : `linear-gradient(90deg, ${colors.accentDim}, ${colors.accent})`, width: `${pct}%`, transition: "width 1s ease" }} />
+                </div>
               </div>
-              <div style={{ height: 9, background: colors.cardAlt, borderRadius: 5, overflow: "hidden" }}>
-                <div style={{ height: "100%", borderRadius: 5, background: i === 0 ? `linear-gradient(90deg, ${colors.warning}, #e8b82a)` : `linear-gradient(90deg, ${colors.accentDim}, ${colors.accent})`, width: `${totalVotesResult > 0 ? (r.vote_count / totalVotesResult * 100) : 0}%`, transition: "width 1s ease" }} />
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
 

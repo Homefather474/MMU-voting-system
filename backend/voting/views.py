@@ -393,6 +393,21 @@ class ElectionResultsView(APIView):
         results.sort(key=lambda r: r['vote_count'], reverse=True)
         total_votes = sum(r['vote_count'] for r in results)
 
+        # Compute percentages using the largest-remainder method so that,
+        # unlike naive independent rounding, the displayed percentages always
+        # sum to exactly 100 (or 0 when no votes have been cast yet).
+        if total_votes > 0:
+            raw = [(r['vote_count'] / total_votes) * 100 for r in results]
+            floors = [int(x) for x in raw]
+            remainder_budget = 100 - sum(floors)
+            order_by_remainder = sorted(range(len(raw)), key=lambda i: (raw[i] - floors[i]), reverse=True)
+            bump_indices = set(order_by_remainder[:remainder_budget])
+            for idx, r in enumerate(results):
+                r['percentage'] = floors[idx] + (1 if idx in bump_indices else 0)
+        else:
+            for r in results:
+                r['percentage'] = 0
+
         winner = None
         if results and total_votes > 0:
             top_count = results[0]['vote_count']
